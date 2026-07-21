@@ -1,0 +1,156 @@
+.pdd-saved-page {
+  max-width: 50rem;
+}
+
+.pdd-saved-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pdd-saved-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--teal-soft);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: pdd-card-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: box-shadow 0.2s ease, transform 0.25s ease, opacity 0.25s ease, max-height 0.25s ease;
+}
+
+@keyframes pdd-card-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pdd-saved-card:hover {
+  box-shadow: 0 12px 24px -14px rgba(13, 43, 69, 0.35);
+}
+
+.pdd-saved-card.is-removing {
+  opacity: 0;
+  transform: translateX(24px) scale(0.98);
+}
+
+.pdd-saved-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.pdd-saved-card__row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.15rem;
+}
+
+.pdd-saved-card__org {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.pdd-tag--light {
+  background: var(--navy);
+  color: #fff;
+  border: none;
+}
+
+.pdd-saved-card__titulo {
+  margin: 0.1rem 0 0.3rem;
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.pdd-saved-card__meta {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.pdd-saved-card__meta svg {
+  width: 12px;
+  height: 12px;
+}
+
+.pdd-saved-card__dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--muted);
+  margin: 0 0.15rem;
+}
+
+.pdd-saved-card__actions {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.pdd-status-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: none;
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: inherit;
+  background: var(--teal);
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease;
+}
+
+.pdd-status-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.pdd-status-btn:hover:not(:disabled) {
+  transform: translateY(-1px) scale(1.03);
+}
+
+.pdd-status-btn.is-done {
+  background: var(--navy);
+  cursor: default;
+}
+
+.pdd-remove-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.pdd-remove-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.pdd-remove-btn:hover {
+  color: var(--danger);
+}
+
+.pdd-saved-empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 2rem 0;
+}
