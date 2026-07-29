@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { DashIcon } from './Icons'
 import './FaqPage.css'
 
@@ -22,6 +23,43 @@ const FAQS = [
 
 export default function FaqPage() {
   const [openId, setOpenId] = useState<string | null>('1')
+  const [modalOpen, setModalOpen] = useState(false)
+  const [assunto, setAssunto] = useState('')
+  const [descricao, setDescricao] = useState('')
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle')
+
+  useEffect(() => {
+    if (!modalOpen) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') closeModal()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [modalOpen])
+
+  function openModal() {
+    setModalOpen(true)
+    setStatus('idle')
+  }
+
+  function closeModal() {
+    setModalOpen(false)
+  }
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    if (!assunto.trim() || !descricao.trim()) return
+    setStatus('sending')
+    window.setTimeout(() => {
+      setStatus('sent')
+      window.setTimeout(() => {
+        setModalOpen(false)
+        setAssunto('')
+        setDescricao('')
+        setStatus('idle')
+      }, 1100)
+    }, 700)
+  }
 
   return (
     <div className="pdd-faq-page">
@@ -33,7 +71,7 @@ export default function FaqPage() {
             precisa, nossa equipe está pronta para ajudar.
           </p>
         </div>
-        <button type="button" className="pdd-faq-new">
+        <button type="button" className="pdd-faq-new" onClick={openModal}>
           <DashIcon name="plus" /> Nova pergunta
         </button>
       </div>
@@ -64,6 +102,60 @@ export default function FaqPage() {
           )
         })}
       </div>
+
+      {createPortal(
+        <div className={`pdd-faq-modal-backdrop ${modalOpen ? 'is-open' : ''}`} onClick={closeModal}>
+          <div
+            className={`pdd-faq-modal ${modalOpen ? 'is-open' : ''}`}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Nova pergunta"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {status === 'sent' ? (
+              <div className="pdd-faq-modal__sent">
+                <span className="pdd-faq-modal__sent-icon"><DashIcon name="check" /></span>
+                <p>Pergunta enviada! Nossa equipe vai te responder em breve.</p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit}>
+                <label className="pdd-faq-modal__field">
+                  <span>Assunto</span>
+                  <input
+                    type="text"
+                    value={assunto}
+                    onChange={(e) => setAssunto(e.target.value)}
+                    placeholder="Ex: Problema ao salvar um edital"
+                    autoFocus
+                  />
+                </label>
+
+                <label className="pdd-faq-modal__field">
+                  <span>Descreva o que está acontecendo</span>
+                  <textarea
+                    value={descricao}
+                    onChange={(e) => setDescricao(e.target.value)}
+                    placeholder="Conte com detalhes o que você está vivenciando"
+                    rows={4}
+                  />
+                </label>
+
+                <div className="pdd-faq-modal__actions">
+                  <button
+                    type="submit"
+                    className={`pdd-faq-modal__submit ${status === 'sending' ? 'is-loading' : ''}`}
+                    disabled={status === 'sending'}
+                  >
+                    <span className="pdd-faq-modal__submit-label">Enviar</span>
+                    <span className="pdd-faq-modal__spinner" aria-hidden="true" />
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>,
+        document.body,
+      )}
     </div>
   )
 }

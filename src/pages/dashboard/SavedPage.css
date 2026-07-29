@@ -154,3 +154,20 @@
   color: var(--muted);
   padding: 2rem 0;
 }
+
+@media (max-width: 480px) {
+  .pdd-saved-card {
+    flex-wrap: wrap;
+  }
+
+  .pdd-saved-card__body {
+    flex-basis: 100%;
+  }
+
+  .pdd-saved-card__actions {
+    flex-direction: row;
+    align-items: center;
+    flex-basis: 100%;
+    justify-content: space-between;
+  }
+}

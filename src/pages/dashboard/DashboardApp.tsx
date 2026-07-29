@@ -11,9 +11,11 @@ import ProfilePage, { type ProfileData } from './ProfilePage'
 export default function DashboardApp({
   userName = 'Raiane',
   onLogout,
+  onOpenAdmin,
 }: {
   userName?: string
   onLogout?: () => void
+  onOpenAdmin?: () => void
 }) {
   const [page, setPage] = useState<PageKey>('feed')
   const [profile, setProfile] = useState<ProfileData>({
@@ -36,6 +38,7 @@ export default function DashboardApp({
       preference={preference}
       avatarUrl={profile.avatarUrl}
       onLogout={onLogout}
+      onOpenAdmin={onOpenAdmin}
     >
       {page === 'feed' && <FeedPage userName={firstName} />}
       {page === 'calendar' && <CalendarPage />}

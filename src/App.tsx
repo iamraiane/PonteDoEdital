@@ -3,8 +3,9 @@ import SignupFlow from './pages/SignupFlow'
 import LoginFlow from './pages/LoginFlow'
 import RecoverFlow from './pages/RecoverFlow'
 import DashboardApp from './pages/dashboard/DashboardApp'
+import AdminApp from './pages/admin/AdminApp'
 
-type Screen = 'login' | 'signup' | 'recover' | 'dashboard'
+type Screen = 'login' | 'signup' | 'recover' | 'dashboard' | 'admin'
 
 function App() {
   const [screen, setScreen] = useState<Screen>('signup')
@@ -24,8 +25,23 @@ function App() {
     return <RecoverFlow onSwitchToLogin={() => setScreen('login')} />
   }
 
+  if (screen === 'admin') {
+    return (
+      <AdminApp
+        onExitAdmin={() => setScreen('dashboard')}
+        onLogout={() => setScreen('login')}
+      />
+    )
+  }
+
   if (screen === 'dashboard') {
-    return <DashboardApp userName={userName} onLogout={() => setScreen('login')} />
+    return (
+      <DashboardApp
+        userName={userName}
+        onLogout={() => setScreen('login')}
+        onOpenAdmin={() => setScreen('admin')}
+      />
+    )
   }
 
   return (

@@ -627,6 +627,36 @@ html, body {
   }
 }
 
+/* ---------- responsivo: telas bem estreitas ---------- */
+
+@media (max-width: 480px) {
+  .pde-side {
+    padding: 1.8rem 1.3rem;
+  }
+
+  .pde-brand__icon,
+  .pde-brand__logo {
+    height: 2.6rem;
+  }
+
+  .pde-side__body {
+    margin-top: 1.6rem;
+  }
+
+  .pde-headline {
+    font-size: 1.5rem;
+  }
+
+  .pde-form-panel {
+    padding: 1.8rem 1.2rem;
+  }
+
+  .pde-actions--center .pde-btn--primary {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
 /* ---------- acessibilidade: reduzir movimento ---------- */
 
 @media (prefers-reduced-motion: reduce) {

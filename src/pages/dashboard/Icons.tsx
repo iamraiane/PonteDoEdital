@@ -127,6 +127,30 @@ export function DashIcon({ name }: { name: string }) {
           <path d="M3.5 9.5h17M8 3v4M16 3v4M12 13.2l1.6 1.6" strokeLinecap="round" />
         </svg>
       )
+    case 'file':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <path d="M7 3.2h6.2l4.8 4.8v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.2a1 1 0 0 1 1-1Z" strokeLinejoin="round" />
+          <path d="M13.2 3.2V8h4.8" strokeLinejoin="round" />
+          <path d="M9 13h6M9 16.5h6" strokeLinecap="round" />
+        </svg>
+      )
+    case 'dots':
+      return (
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="5.2" r="1.8" />
+          <circle cx="12" cy="12" r="1.8" />
+          <circle cx="12" cy="18.8" r="1.8" />
+        </svg>
+      )
+    case 'id-badge':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <rect x="3.2" y="4.5" width="17.6" height="15" rx="2.4" />
+          <circle cx="12" cy="10.2" r="2.6" />
+          <path d="M7.6 17c.9-2.1 2.4-3 4.4-3s3.5.9 4.4 3" strokeLinecap="round" />
+        </svg>
+      )
     case 'camera':
       return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
