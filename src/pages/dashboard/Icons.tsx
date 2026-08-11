@@ -158,6 +158,13 @@ export function DashIcon({ name }: { name: string }) {
           <circle cx="12" cy="13" r="3.4" />
         </svg>
       )
+    case 'trophy':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2 18h20v2H2z" fill="currentColor" stroke="none" />
+          <path d="M2 16l3-10 5 5 2-7 2 7 5-5 3 10" strokeLinejoin="round" />
+        </svg>
+      )
     default:
       return null
   }

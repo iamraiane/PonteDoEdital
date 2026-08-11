@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { DashIcon } from './Icons'
+import { type PageKey } from './DashboardShell'
 import './CalendarPage.css'
 
 const WEEKDAYS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
@@ -8,7 +9,13 @@ const MONTHS = [
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
 ]
 
-export default function CalendarPage() {
+export default function CalendarPage({
+  hasPremium = false,
+  onNavigate,
+}: {
+  hasPremium?: boolean
+  onNavigate?: (page: PageKey) => void
+}) {
   const [cursor, setCursor] = useState({ year: 2026, month: 6 }) // Julho 2026
   const [selected, setSelected] = useState(12)
 
@@ -37,6 +44,22 @@ export default function CalendarPage() {
       <h1 className="pdd-page-title">Calendário</h1>
 
       <div className="pdd-calendar-card">
+        {!hasPremium && (
+          <div className="pdd-calendar-locked">
+            <div className="pdd-calendar-locked__card">
+              <span className="pdd-calendar-locked__icon"><DashIcon name="trophy" /></span>
+              <p className="pdd-calendar-locked__text">Para acessar:</p>
+              <button
+                type="button"
+                className="pdd-calendar-locked__cta"
+                onClick={() => onNavigate?.('plans')}
+              >
+                Assinar Premium
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="pdd-calendar-card__head">
           <p>{MONTHS[cursor.month]} {cursor.year}</p>
           <div className="pdd-calendar-nav">

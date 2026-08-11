@@ -6,9 +6,9 @@ import './DashboardShell.css'
 
 export type PageKey = 'feed' | 'calendar' | 'saved' | 'plans' | 'faq' | 'about' | 'profile'
 
-const NAV_ITEMS: { key: PageKey; label: string; icon: string }[] = [
+const NAV_ITEMS: { key: PageKey; label: string; icon: string; premium?: boolean }[] = [
   { key: 'feed', label: 'Feed', icon: 'home' },
-  { key: 'calendar', label: 'Calendário', icon: 'calendar' },
+  { key: 'calendar', label: 'Calendário', icon: 'calendar', premium: true },
   { key: 'saved', label: 'Salvos', icon: 'bookmark' },
   { key: 'plans', label: 'Planos', icon: 'filter' },
   { key: 'faq', label: 'Faq e dúvidas', icon: 'question' },
@@ -39,6 +39,7 @@ export default function DashboardShell({
   userName,
   preference,
   avatarUrl,
+  hasPremium,
   onLogout,
   onOpenAdmin,
   children,
@@ -48,6 +49,7 @@ export default function DashboardShell({
   userName: string
   preference?: string
   avatarUrl?: string | null
+  hasPremium?: boolean
   onLogout?: () => void
   onOpenAdmin?: () => void
   children: ReactNode
@@ -219,6 +221,9 @@ export default function DashboardShell({
               >
                 <span className="pdd-nav__icon"><DashIcon name={item.icon} /></span>
                 {item.label}
+                {item.premium && !hasPremium && (
+                  <span className="pdd-nav__trophy"><DashIcon name="trophy" /></span>
+                )}
               </button>
             ))}
           </nav>
