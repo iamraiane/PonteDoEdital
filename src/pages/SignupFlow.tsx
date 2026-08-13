@@ -1,6 +1,7 @@
 import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
 import logoNome from '../assets/logo-nome.png'
 import logoPonte from '../assets/logo-ponte.png'
+import { register } from '../services/user'
 import './SignupFlow.css'
 
 const ESTADOS = [
@@ -112,6 +113,8 @@ export default function SignupFlow({
   const [showPassword, setShowPassword] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [shake, setShake] = useState(false)
+  const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle')
+  const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true))
@@ -157,7 +160,22 @@ export default function SignupFlow({
     }))
   }
 
-  const firstName = form.nome.trim().split(' ')[0] || 'visitante'
+  function handleFinish() {
+    if (status === 'loading') return
+    setStatus('loading')
+    setErrorMessage('')
+
+    register(form.nome, form.email, form.senha)
+      .then(() => {
+        const firstName = form.nome.trim().split(' ')[0] || 'visitante'
+        if (onFinish) onFinish(firstName)
+      })
+      .catch((err) => {
+        setStatus('error')
+        setErrorMessage(err.message || 'Erro ao criar conta')
+        triggerShake()
+      })
+  }
 
   return (
     <div className={`pde-shell ${mounted ? 'pde-shell--mounted' : ''}`}>
@@ -229,7 +247,13 @@ export default function SignupFlow({
                 />
               )}
               {step === 3 && (
-                <StepDone firstName={firstName} onBack={() => goTo(2, -1)} onFinish={() => onFinish && onFinish(firstName)} />
+                <StepDone
+                  firstName={form.nome.trim().split(' ')[0] || 'visitante'}
+                  onBack={() => goTo(2, -1)}
+                  onFinish={handleFinish}
+                  status={status}
+                  errorMessage={errorMessage}
+                />
               )}
             </div>
           </div>
@@ -405,9 +429,24 @@ function StepInterests({
   )
 }
 
-function StepDone({ firstName, onBack, onFinish }: { firstName: string; onBack: () => void; onFinish?: () => void }) {
+function StepDone({
+  firstName,
+  onBack,
+  onFinish,
+  status,
+  errorMessage,
+}: {
+  firstName: string
+  onBack: () => void
+  onFinish?: () => void
+  status?: 'idle' | 'loading' | 'error'
+  errorMessage?: string
+}) {
   return (
     <div className="pde-done">
+      {status === 'error' && errorMessage && (
+        <p className="pde-error">{errorMessage}</p>
+      )}
       <p className="pde-done__title">
         Tudo pronto, <span>{firstName}</span>!
       </p>
@@ -416,8 +455,15 @@ function StepDone({ firstName, onBack, onFinish }: { firstName: string; onBack: 
         <button type="button" className="pde-btn pde-btn--ghost" onClick={onBack}>
           <Icon name="back" /> Voltar
         </button>
-        <button type="button" className="pde-btn pde-btn--primary" onClick={onFinish}>
-          Ir para o feed <Icon name="arrow" />
+        <button
+          type="button"
+          className={`pde-btn pde-btn--primary ${status === 'loading' ? 'is-loading' : ''}`}
+          onClick={onFinish}
+          disabled={status === 'loading'}
+        >
+          <span className="pde-btn__label">Ir para o feed</span>
+          <Icon name="arrow" />
+          <span className="pde-btn__spinner" aria-hidden="true" />
         </button>
       </div>
     </div>

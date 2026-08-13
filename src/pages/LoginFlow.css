@@ -472,6 +472,19 @@ html, body {
   to { transform: rotate(360deg); }
 }
 
+/* ---------- erro ---------- */
+
+.pde-error {
+  background: #fef2f2;
+  color: var(--danger);
+  border: 1px solid #fecaca;
+  border-radius: var(--radius);
+  padding: 0.6rem 0.9rem;
+  font-size: 0.85rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
 /* ---------- rodapé ---------- */
 
 .pde-login-hint {

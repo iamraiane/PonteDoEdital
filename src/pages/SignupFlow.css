@@ -493,6 +493,35 @@ html, body {
   transform: translateY(0) scale(0.98);
 }
 
+.pde-btn--primary:disabled {
+  cursor: default;
+}
+
+.pde-btn__spinner {
+  display: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+}
+
+.pde-btn.is-loading .pde-btn__label,
+.pde-btn.is-loading svg {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.pde-btn.is-loading .pde-btn__spinner {
+  display: inline-block;
+  animation: pde-spin 0.7s linear infinite;
+}
+
+@keyframes pde-spin {
+  to { transform: rotate(360deg); }
+}
+
 .pde-btn--ghost {
   flex: 1;
   background: transparent;
@@ -511,6 +540,19 @@ html, body {
 
 .pde-btn--ghost:active {
   transform: translateY(0) scale(0.98);
+}
+
+/* ---------- erro ---------- */
+
+.pde-error {
+  background: #fef2f2;
+  color: var(--danger);
+  border: 1px solid #fecaca;
+  border-radius: var(--radius);
+  padding: 0.6rem 0.9rem;
+  font-size: 0.85rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
 }
 
 /* ---------- etapa 2: interesses ---------- */

@@ -1,6 +1,7 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import logoNome from '../assets/logo-nome.png'
 import logoPonte from '../assets/logo-ponte.png'
+import { login } from '../services/user'
 import './LoginFlow.css'
 
 const FEATURES = [
@@ -93,7 +94,8 @@ export default function LoginFlow({
   const [showPassword, setShowPassword] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [shake, setShake] = useState(false)
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle')
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [errorMessage, setErrorMessage] = useState('')
   const [touched, setTouched] = useState(false)
 
   useEffect(() => {
@@ -114,18 +116,27 @@ export default function LoginFlow({
     e.preventDefault()
     setTouched(true)
 
-    if (!formValid || status !== 'idle') {
+    if (!formValid || status === 'loading') {
       triggerShake()
       return
     }
 
     setStatus('loading')
-    window.setTimeout(() => {
-      setStatus('success')
-      window.setTimeout(() => {
-        if (onLoginSuccess) onLoginSuccess()
-      }, 1300)
-    }, 1100)
+    setErrorMessage('')
+
+    login(form.email, form.senha)
+      .then((data) => {
+        localStorage.setItem('token', data.token)
+        setStatus('success')
+        window.setTimeout(() => {
+          if (onLoginSuccess) onLoginSuccess()
+        }, 1300)
+      })
+      .catch((err) => {
+        setStatus('error')
+        setErrorMessage(err.message || 'Erro ao fazer login')
+        triggerShake()
+      })
   }
 
   return (
@@ -190,6 +201,9 @@ export default function LoginFlow({
                 onSubmit={handleSubmit}
                 noValidate
               >
+                {status === 'error' && (
+                  <p className="pde-error">{errorMessage}</p>
+                )}
                 <label className="pde-field">
                   <span>E-mail</span>
                   <div className={`pde-input-icon ${touched && !emailValid ? 'is-invalid' : ''}`}>
