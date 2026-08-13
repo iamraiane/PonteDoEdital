@@ -36,15 +36,23 @@ function formatDate(dateStr: string | null): string {
   return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
+function extractOrgName(link: string): string {
+  if (!link) return 'Órgão não informado'
+  const match = link.match(/^([A-ZÀ-Ú\s\-\.]+?)(?:\s+[A-Z]{2}\d|\s+[A-Z]{2}\s)/)
+  if (match) return match[1].trim()
+  const parts = link.split(/\s{2,}/)
+  return parts[0]?.trim() || link.substring(0, 60)
+}
+
 function mapNoticeToEdital(n: NoticeApi): Edital {
   return {
     id: String(n.id),
-    orgao: n.area?.name ?? 'Órgão não informado',
-    local: n.state?.name ?? 'Local não informado',
+    orgao: n.area?.name ?? extractOrgName(n.link),
+    local: n.state?.name ?? n.state?.code ?? 'Local não informado',
     tempo: formatTimeAgo(n.created_at),
     tag: n.area?.name ?? 'Geral',
     tipo: 'Edital Público',
-    titulo: n.title,
+    titulo: n.description?.split('\n')[0]?.substring(0, 80) ?? n.title,
     descricao: n.description ?? '',
     prazo: formatDate(n.publication_date),
   }
