@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DashIcon, DashAvatar } from './Icons'
 import './FeedPage.css'
+import { getNotices, type NoticeApi } from '../../services/notice'
 
 const CATEGORIAS = ['Todos', 'Infraestrutura', 'Tecnologia', 'Saúde', 'Cultura', 'Serviços']
 
@@ -16,25 +17,54 @@ type Edital = {
   prazo: string
 }
 
-const EDITAIS: Edital[] = [
-  {
-    id: '1',
-    orgao: 'Prefeitura de Candido Rodrigues',
-    local: 'Candido Rodrigues / SP',
-    tempo: 'há 2 horas',
-    tag: 'Infraestrutura',
-    tipo: 'Concurso Público',
-    titulo: 'Reforma do Complexo Esportivo Municipal',
-    descricao:
-      'Contratação de empresa especializada para execução de obras de infraestrutura, iluminação LED e recuperação de arquibancadas do complexo esportivo municipal.',
-    prazo: '03 Ago 2026',
-  },
-]
+function formatTimeAgo(dateStr: string | null): string {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMin = Math.floor(diffMs / 60000)
+  if (diffMin < 60) return `há ${diffMin} min`
+  const diffH = Math.floor(diffMin / 60)
+  if (diffH < 24) return `há ${diffH}h`
+  const diffD = Math.floor(diffH / 24)
+  return `há ${diffD} dias`
+}
+
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return 'Sem prazo'
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+function mapNoticeToEdital(n: NoticeApi): Edital {
+  return {
+    id: String(n.id),
+    orgao: n.area?.name ?? 'Órgão não informado',
+    local: n.state?.name ?? 'Local não informado',
+    tempo: formatTimeAgo(n.created_at),
+    tag: n.area?.name ?? 'Geral',
+    tipo: 'Edital Público',
+    titulo: n.title,
+    descricao: n.description ?? '',
+    prazo: formatDate(n.publication_date),
+  }
+}
 
 export default function FeedPage({ userName }: { userName: string }) {
   const [categoria, setCategoria] = useState('Todos')
   const [salvos, setSalvos] = useState<Record<string, boolean>>({})
   const [agendados, setAgendados] = useState<Record<string, boolean>>({})
+  const [editais, setEditais] = useState<Edital[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setLoading(true)
+    getNotices()
+      .then((data) => setEditais(data.map(mapNoticeToEdital)))
+      .catch(() => setError('Erro ao carregar editais'))
+      .finally(() => setLoading(false))
+  }, [])
 
   function toggleSalvo(id: string) {
     setSalvos((s) => ({ ...s, [id]: !s[id] }))
@@ -43,6 +73,9 @@ export default function FeedPage({ userName }: { userName: string }) {
   function agendar(id: string) {
     setAgendados((s) => ({ ...s, [id]: true }))
   }
+
+  const filteredEditais =
+    categoria === 'Todos' ? editais : editais.filter((e) => e.tag === categoria)
 
   return (
     <div className="pdd-feed">
@@ -63,8 +96,12 @@ export default function FeedPage({ userName }: { userName: string }) {
         ))}
       </div>
 
+      {loading && <p>Carregando editais...</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+
       <div className="pdd-edital-list">
-        {EDITAIS.map((e, i) => (
+        {!loading && filteredEditais.length === 0 && <p>Nenhum edital encontrado.</p>}
+        {filteredEditais.map((e, i) => (
           <article
             key={e.id}
             className="pdd-edital-card"
