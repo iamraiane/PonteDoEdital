@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type CSSProperties } from 'react'
 import { DashIcon } from './Icons'
 import { type PageKey } from './DashboardShell'
 import './CalendarPage.css'
@@ -40,7 +40,7 @@ export default function CalendarPage({
   }
 
   return (
-    <div className="pdd-calendar-page">
+    <div className="pdd-calendar-page pdd-calendar-page--full">
       <h1 className="pdd-page-title">Calendário</h1>
 
       <div className="pdd-calendar-card">
@@ -78,7 +78,11 @@ export default function CalendarPage({
           ))}
         </div>
 
-        <div className="pdd-calendar-grid" key={`${cursor.year}-${cursor.month}`}>
+        <div
+          className="pdd-calendar-grid pdd-calendar-grid--body"
+          key={`${cursor.year}-${cursor.month}`}
+          style={{ '--pdd-cal-rows': Math.ceil(cells.length / 7) } as CSSProperties}
+        >
           {cells.map((day, i) => (
             <button
               key={i}

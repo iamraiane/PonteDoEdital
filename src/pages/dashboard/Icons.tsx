@@ -1,3 +1,5 @@
+import coroaImg from '../../assets/coroa.png'
+
 export function DashIcon({ name }: { name: string }) {
   switch (name) {
     case 'home':
@@ -159,11 +161,13 @@ export function DashIcon({ name }: { name: string }) {
         </svg>
       )
     case 'trophy':
+      // Ícone da coroa (imagem enviada pelo usuário) no lugar do troféu SVG.
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M2 18h20v2H2z" fill="currentColor" stroke="none" />
-          <path d="M2 16l3-10 5 5 2-7 2 7 5-5 3 10" strokeLinejoin="round" />
-        </svg>
+        <img
+          src={coroaImg}
+          alt="Premium"
+          style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+        />
       )
     default:
       return null

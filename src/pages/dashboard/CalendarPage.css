@@ -1,7 +1,23 @@
+/* ==========================================================================
+   Ponte do Edital — Calendário (tela cheia)
+   ========================================================================== */
+
 .pdd-calendar-page {
   width: 100%;
   max-width: 100%;
   text-align: left;
+}
+
+/* Ocupa 100% do espaço disponível dentro do .pdd-main, empurrando
+   o card do calendário para preencher toda a tela (largura e altura). */
+.pdd-calendar-page--full {
+  display: flex;
+  flex-direction: column;
+  /* neutraliza o padding do .pdd-main para o calendário colar nas bordas */
+  margin: -1.8rem -2rem -2.5rem;
+  padding: 1.4rem 1.6rem 1.6rem;
+  height: calc(100% + 1.8rem + 2.5rem);
+  box-sizing: border-box;
 }
 
 .pdd-page-title {
@@ -10,6 +26,7 @@
   margin: 0 0 1.2rem;
   color: var(--ink);
   text-align: left;
+  flex: 0 0 auto;
 }
 
 .pdd-calendar-card {
@@ -20,6 +37,10 @@
   width: 100%;
   max-width: none;
   box-sizing: border-box;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .pdd-calendar-card__head {
@@ -27,6 +48,7 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1rem;
+  flex: 0 0 auto;
 }
 
 .pdd-calendar-card__head p {
@@ -71,26 +93,36 @@
 }
 
 .pdd-calendar-grid--head {
+  flex: 0 0 auto;
   margin-bottom: 0.5rem;
 }
 
 .pdd-calendar-grid--head span {
   text-align: center;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--muted);
   padding-bottom: 0.2rem;
 }
 
+/* corpo do calendário: ocupa todo o espaço restante do card,
+   com linhas do mesmo tamanho (--pdd-cal-rows definido inline no tsx) */
+.pdd-calendar-grid--body {
+  flex: 1;
+  min-height: 0;
+  grid-template-rows: repeat(var(--pdd-cal-rows, 6), 1fr);
+}
+
 .pdd-calendar-day {
-  aspect-ratio: 1;
-  max-height: 4rem;
-  max-width: 4rem;
-  margin: 0 auto;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  max-width: none;
+  margin: 0;
   border: none;
   background: transparent;
-  border-radius: 50%;
-  font-size: 1.05rem;
+  border-radius: 12px;
+  font-size: 1.15rem;
   font-weight: 600;
   font-family: inherit;
   color: var(--ink);
@@ -114,13 +146,13 @@
 
 .pdd-calendar-day:not(.is-empty):hover {
   background: rgba(255, 255, 255, 0.7);
-  transform: scale(1.08);
+  transform: scale(1.05);
 }
 
 .pdd-calendar-day.is-selected {
   background: var(--muted);
   color: #fff;
-  transform: scale(1.05);
+  transform: scale(1.02);
 }
 
 /* ---------- overlay bloqueado (premium) ---------- */
@@ -150,16 +182,8 @@
 .pdd-calendar-locked__icon {
   width: 64px;
   height: 64px;
-  color: #f5c542;
   display: grid;
   place-items: center;
-  filter: drop-shadow(0 0 4px rgba(245, 197, 66, 0.5));
-}
-
-.pdd-calendar-locked__icon svg {
-  width: 100%;
-  height: 100%;
-  stroke-width: 2.2;
 }
 
 .pdd-calendar-locked__text {
@@ -185,4 +209,19 @@
 .pdd-calendar-locked__cta:hover {
   background: #163d5c;
   transform: scale(1.03);
+}
+
+/* ---------- responsivo (celular) ---------- */
+
+@media (max-width: 880px) {
+  .pdd-calendar-page--full {
+    margin: -1.3rem -1rem calc(-1.4rem - 3.6rem);
+    height: calc(100% + 1.3rem + 1.4rem + 3.6rem);
+    padding: 1rem 1rem 1.2rem;
+  }
+
+  .pdd-calendar-day {
+    font-size: 1rem;
+    border-radius: 8px;
+  }
 }
