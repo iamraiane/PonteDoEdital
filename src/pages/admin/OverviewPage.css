@@ -71,3 +71,35 @@
     min-width: 100%;
   }
 }
+
+/* ---------- responsivo: Xiaomi, Pocophone, iPhone SE ---------- */
+
+@media (max-width: 390px) {
+  .pda-page-title {
+    font-size: 1.3rem;
+  }
+
+  .pda-page-sub {
+    font-size: 0.85rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .pda-metrics-panel {
+    padding: 1rem;
+    gap: 0.8rem;
+    border-radius: 14px;
+  }
+
+  .pda-metric-card {
+    padding: 1rem 1.2rem;
+    border-radius: 12px;
+  }
+
+  .pda-metric-card__label {
+    font-size: 0.8rem;
+  }
+
+  .pda-metric-card__value {
+    font-size: 1.7rem;
+  }
+}

@@ -565,3 +565,87 @@
     padding: 1.3rem 1.2rem 1.5rem;
   }
 }
+
+/* ---------- responsivo: Xiaomi, Pocophone, iPhone SE ---------- */
+
+@media (max-width: 390px) {
+  .pda-editais-page {
+    max-width: 100%;
+  }
+
+  .pda-search input {
+    padding: 0.5rem 0.8rem 0.5rem 2.3rem;
+    font-size: 0.85rem;
+  }
+
+  .pda-toggle-label {
+    font-size: 0.82rem;
+  }
+
+  .pda-switch {
+    width: 2.3rem;
+    height: 1.35rem;
+  }
+
+  .pda-switch__knob {
+    width: 16px;
+    height: 16px;
+  }
+
+  .pda-switch.is-on .pda-switch__knob {
+    transform: translateX(16px);
+  }
+
+  .pda-table thead th {
+    padding: 0.7rem 0.9rem;
+    font-size: 0.76rem;
+  }
+
+  .pda-table td {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .pda-table tbody tr {
+    border-radius: 12px;
+    margin-bottom: 0.6rem;
+  }
+
+  .pda-cell-title {
+    font-size: 0.85rem;
+  }
+
+  .pda-cell-sub {
+    font-size: 0.7rem;
+  }
+
+  .pda-modal {
+    padding: 1.1rem 1rem 1.3rem;
+    border-radius: 14px;
+  }
+
+  .pda-modal-title {
+    font-size: 1rem;
+  }
+
+  .pda-field input,
+  .pda-field select,
+  .pda-field textarea {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.82rem;
+  }
+
+  .pda-btn {
+    padding: 0.65rem;
+    font-size: 0.85rem;
+  }
+
+  .pda-row-menu {
+    right: 0.8rem;
+  }
+
+  .pda-row-menu button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+}

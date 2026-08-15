@@ -88,3 +88,72 @@
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.82);
 }
+
+/* ---------- responsivo (celular) ---------- */
+
+@media (max-width: 480px) {
+  .pdd-about-page {
+    max-width: 100%;
+  }
+
+  .pdd-about-intro {
+    font-size: 0.88rem;
+  }
+
+  .pdd-about-card {
+    padding: 1.1rem 1.2rem;
+    border-radius: 12px;
+  }
+
+  .pdd-about-card h2 {
+    font-size: 0.95rem;
+  }
+
+  .pdd-about-card__inner {
+    padding: 0.85rem 1rem;
+  }
+
+  .pdd-about-card__inner p {
+    font-size: 0.85rem;
+  }
+
+  .pdd-team-grid {
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0.8rem;
+  }
+
+  .pdd-team-card {
+    padding: 1rem 0.9rem;
+    border-radius: 10px;
+  }
+
+  .pdd-team-card__nome {
+    font-size: 0.88rem;
+  }
+
+  .pdd-team-card__papel {
+    font-size: 0.72rem;
+  }
+}
+
+/* ---------- responsivo: Xiaomi, Pocophone, iPhone SE ---------- */
+
+@media (max-width: 390px) {
+  .pdd-team-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+  }
+
+  .pdd-team-card {
+    padding: 0.8rem 0.7rem;
+  }
+
+  .pdd-team-card svg {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .pdd-team-card__nome {
+    font-size: 0.82rem;
+  }
+}

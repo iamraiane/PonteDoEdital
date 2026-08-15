@@ -144,3 +144,50 @@
 .pdd-plan-cta.is-primary:hover {
   background: #0c8478;
 }
+
+/* ---------- responsivo (tablet/celular) ---------- */
+
+@media (max-width: 480px) {
+  .pdd-plans-grid {
+    flex-direction: column;
+  }
+
+  .pdd-plan-card {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+}
+
+/* ---------- responsivo: Xiaomi, Pocophone, iPhone SE ---------- */
+
+@media (max-width: 390px) {
+  .pdd-plans-page {
+    max-width: 100%;
+  }
+
+  .pdd-plans-sub {
+    font-size: 0.85rem;
+  }
+
+  .pdd-plan-card {
+    padding: 1.2rem 1.2rem 1.4rem;
+    border-radius: 12px;
+  }
+
+  .pdd-plan-card__nome {
+    font-size: 0.95rem;
+  }
+
+  .pdd-plan-card__preco {
+    font-size: 1.7rem;
+  }
+
+  .pdd-plan-card__features li {
+    font-size: 0.82rem;
+  }
+
+  .pdd-plan-cta {
+    padding: 0.65rem 0.9rem;
+    font-size: 0.85rem;
+  }
+}

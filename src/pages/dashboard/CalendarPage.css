@@ -225,3 +225,68 @@
     border-radius: 8px;
   }
 }
+
+/* ---------- responsivo: Xiaomi, Pocophone, iPhone SE ---------- */
+
+@media (max-width: 390px) {
+  .pdd-calendar-page--full {
+    margin: -1rem -0.8rem calc(-1rem - 3.6rem);
+    height: calc(100% + 1rem + 1rem + 3.6rem);
+    padding: 0.8rem 0.7rem 1rem;
+  }
+
+  .pdd-page-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .pdd-calendar-card {
+    padding: 0.9rem 1rem 1.1rem;
+    border-radius: 12px;
+  }
+
+  .pdd-calendar-card__head p {
+    font-size: 0.9rem;
+  }
+
+  .pdd-calendar-grid {
+    gap: 0.25rem;
+  }
+
+  .pdd-calendar-grid--head span {
+    font-size: 0.75rem;
+  }
+
+  .pdd-calendar-day {
+    font-size: 0.85rem;
+    border-radius: 6px;
+  }
+
+  .pdd-calendar-nav button {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .pdd-calendar-nav button svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  .pdd-calendar-locked__card {
+    padding: 1.5rem 1.8rem;
+  }
+
+  .pdd-calendar-locked__icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .pdd-calendar-locked__text {
+    font-size: 0.95rem;
+  }
+
+  .pdd-calendar-locked__cta {
+    font-size: 0.92rem;
+    padding: 0.7rem 2rem;
+  }
+}

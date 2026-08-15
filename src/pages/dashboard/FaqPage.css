@@ -330,3 +330,55 @@
   font-size: 0.9rem;
   line-height: 1.5;
 }
+
+/* ---------- responsivo: Xiaomi, Pocophone, iPhone SE ---------- */
+
+@media (max-width: 390px) {
+  .pdd-faq-page {
+    max-width: 100%;
+  }
+
+  .pdd-faq-header {
+    margin-bottom: 1.2rem;
+  }
+
+  .pdd-faq-sub {
+    font-size: 0.85rem;
+  }
+
+  .pdd-faq-new {
+    padding: 0.55rem 0.9rem;
+    font-size: 0.8rem;
+  }
+
+  .pdd-faq-question {
+    padding: 0.65rem 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  .pdd-faq-answer {
+    font-size: 0.82rem;
+  }
+
+  .pdd-faq-modal {
+    padding: 1.2rem 1rem 1.3rem;
+    border-radius: 14px;
+  }
+
+  .pdd-faq-modal__field {
+    font-size: 0.8rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .pdd-faq-modal__field input,
+  .pdd-faq-modal__field textarea {
+    padding: 0.55rem 0.75rem;
+    font-size: 0.82rem;
+  }
+
+  .pdd-faq-modal__submit {
+    min-width: 8rem;
+    padding: 0.65rem 1.2rem;
+    font-size: 0.85rem;
+  }
+}

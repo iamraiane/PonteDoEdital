@@ -171,3 +171,33 @@
     justify-content: space-between;
   }
 }
+
+/* ---------- responsivo: Xiaomi, Pocophone, iPhone SE ---------- */
+
+@media (max-width: 390px) {
+  .pdd-saved-card {
+    padding: 0.8rem 0.9rem;
+    border-radius: 10px;
+  }
+
+  .pdd-saved-card__titulo {
+    font-size: 0.95rem;
+  }
+
+  .pdd-saved-card__org {
+    font-size: 0.76rem;
+  }
+
+  .pdd-saved-card__meta {
+    font-size: 0.72rem;
+  }
+
+  .pdd-status-btn {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.72rem;
+  }
+
+  .pdd-remove-btn {
+    font-size: 0.7rem;
+  }
+}

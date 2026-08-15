@@ -288,3 +288,58 @@
     gap: 0.5rem;
   }
 }
+
+/* ---------- responsivo: Xiaomi, Pocophone, iPhone SE ---------- */
+
+@media (max-width: 390px) {
+  .pdd-greeting {
+    font-size: 1.3rem;
+  }
+
+  .pdd-pill {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  .pdd-edital-card {
+    padding: 1rem 1rem 0;
+    border-radius: 12px;
+  }
+
+  .pdd-edital-card__head {
+    gap: 0.4rem 0.6rem;
+  }
+
+  .pdd-edital-card__org-name {
+    font-size: 0.85rem;
+  }
+
+  .pdd-tag {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.7rem;
+  }
+
+  .pdd-edital-card__titulo {
+    font-size: 1rem;
+  }
+
+  .pdd-edital-card__desc {
+    font-size: 0.8rem;
+  }
+
+  .pdd-btn-outline {
+    padding: 0.55rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .pdd-bookmark-btn {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+
+  .pdd-edital-card__footer {
+    margin: 0 -1rem;
+    padding: 0.7rem 1rem;
+    font-size: 0.76rem;
+  }
+}

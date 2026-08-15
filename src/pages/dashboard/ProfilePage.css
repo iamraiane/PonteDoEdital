@@ -236,3 +236,54 @@
 .pdd-profile-save:active {
   transform: translateY(0) scale(0.98);
 }
+
+/* ---------- responsivo: Xiaomi, Pocophone, iPhone SE ---------- */
+
+@media (max-width: 390px) {
+  .pdd-profile-page {
+    max-width: 100%;
+  }
+
+  .pdd-profile-sub {
+    font-size: 0.85rem;
+  }
+
+  .pdd-profile-card {
+    padding: 1.1rem 1.2rem;
+    border-radius: 12px;
+  }
+
+  .pdd-profile-card h2 {
+    font-size: 0.95rem;
+  }
+
+  .pdd-profile-avatar {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  .pdd-profile-photo-label {
+    font-size: 0.85rem;
+  }
+
+  .pdd-profile-field {
+    font-size: 0.8rem;
+  }
+
+  .pdd-profile-field input,
+  .pdd-profile-field select {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  .pdd-profile-tag {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  .pdd-profile-save {
+    min-width: 8rem;
+    padding: 0.7rem 1.2rem;
+    font-size: 0.85rem;
+  }
+}

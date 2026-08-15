@@ -355,6 +355,48 @@
   }
 }
 
+/* ---------- responsivo: Xiaomi, Pocophone, iPhone SE ---------- */
+
+@media (max-width: 390px) {
+  .pda-header {
+    padding: 0.5rem 0.7rem;
+    gap: 0.6rem;
+  }
+
+  .pda-brand__icon {
+    height: 1.8rem;
+  }
+
+  .pda-admin-btn {
+    font-size: 0.88rem;
+    padding: 0.3rem 0.4rem;
+  }
+
+  .pda-admin-btn__icon {
+    width: 1.7rem;
+    height: 1.7rem;
+  }
+
+  .pda-admin-btn__icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .pda-nav__item {
+    font-size: 0.62rem;
+    padding: 0.35rem 0.2rem;
+  }
+
+  .pda-nav__icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .pda-main {
+    padding: 1rem 0.8rem 1.4rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pda-shell * {
     animation-duration: 0.001ms !important;

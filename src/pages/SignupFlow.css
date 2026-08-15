@@ -699,6 +699,79 @@ html, body {
   }
 }
 
+/* ---------- responsivo: Xiaomi, Pocophone, iPhone SE ---------- */
+
+@media (max-width: 390px) {
+  .pde-side {
+    padding: 1.4rem 1rem;
+  }
+
+  .pde-brand__icon,
+  .pde-brand__logo {
+    height: 2.2rem;
+  }
+
+  .pde-side__body {
+    margin-top: 1.2rem;
+  }
+
+  .pde-headline {
+    font-size: 1.3rem;
+  }
+
+  .pde-sub {
+    font-size: 0.88rem;
+    margin-bottom: 1.6rem;
+  }
+
+  .pde-features__item {
+    font-size: 0.82rem;
+  }
+
+  .pde-form-panel {
+    padding: 1.4rem 1rem;
+  }
+
+  .pde-form-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .pde-stepper__dot {
+    width: 36px;
+    height: 36px;
+    font-size: 0.85rem;
+  }
+
+  .pde-fields {
+    gap: 0.9rem;
+  }
+
+  .pde-field {
+    font-size: 0.8rem;
+  }
+
+  .pde-field input,
+  .pde-field select {
+    padding: 0.65rem 0.8rem;
+    font-size: 0.88rem;
+  }
+
+  .pde-btn {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.88rem;
+  }
+
+  .pde-tag {
+    padding: 0.65rem 0.4rem;
+    font-size: 0.82rem;
+  }
+
+  .pde-login-hint {
+    font-size: 0.8rem;
+    margin-top: 1.4rem;
+  }
+}
+
 /* ---------- acessibilidade: reduzir movimento ---------- */
 
 @media (prefers-reduced-motion: reduce) {
