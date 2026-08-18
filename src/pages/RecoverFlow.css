@@ -39,18 +39,13 @@ html, body {
 }
 
 @media (max-width: 880px) {
-  /* no mobile a tela deixa de ser um overlay fixo em viewport e passa a ser
-     fluxo normal de documento — evita o glitch de sobreposição da barra
-     navy com a barra de endereço dinâmica do navegador */
   .pde-shell {
-    position: static;
-    height: auto;
-    min-height: 100dvh;
-    display: block;
-    overflow: visible;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    overflow-y: auto;
   }
 
-  /* colapsa o painel institucional numa barra compacta no topo, com a logo centralizada */
+  /* colapsa o painel institucional numa barra compacta no topo, só com a logo */
   .pde-side {
     padding: 1.2rem 1.5rem;
     overflow: visible;
@@ -66,23 +61,13 @@ html, body {
     display: none;
   }
 
-  .pde-brand {
-    justify-content: center;
-  }
-
   .pde-brand__icon,
   .pde-brand__logo {
     height: 2.3rem;
   }
 
   .pde-form-panel {
-    display: block;
-    overflow: visible;
-    padding: 2.4rem 1.5rem 2.5rem;
-  }
-
-  .pde-form-panel__inner {
-    margin: 0 auto;
+    padding: 2rem 1.5rem;
   }
 }
 
