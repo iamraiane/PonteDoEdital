@@ -68,7 +68,7 @@ html, body {
   }
 
   .pde-form-panel {
-    padding: 2rem 1.5rem;
+    padding: 2.75rem 1.5rem 2rem;
   }
 }
 
@@ -763,7 +763,7 @@ html, body {
   }
 
   .pde-form-panel {
-    padding: 1.6rem 1.2rem;
+    padding: 2.2rem 1.2rem 1.6rem;
   }
 
   .pde-actions--center .pde-btn--primary {
@@ -785,7 +785,7 @@ html, body {
   }
 
   .pde-form-panel {
-    padding: 1.4rem 1rem;
+    padding: 2rem 1rem 1.4rem;
   }
 
   .pde-form-header h2 {
@@ -836,4 +836,4 @@ html, body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
-}   
+}
