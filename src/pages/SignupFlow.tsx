@@ -37,6 +37,28 @@ const initialForm: FormData = {
   interesses: [],
 }
 
+// ---------- validação de senha ----------
+
+type PasswordChecks = {
+  length: boolean
+  upper: boolean
+  lower: boolean
+  special: boolean
+}
+
+function getPasswordChecks(senha: string): PasswordChecks {
+  return {
+    length: senha.length >= 8,
+    upper: /[A-Z]/.test(senha),
+    lower: /[a-z]/.test(senha),
+    special: /[^A-Za-z0-9]/.test(senha),
+  }
+}
+
+function isPasswordValid(checks: PasswordChecks) {
+  return checks.length && checks.upper && checks.lower && checks.special
+}
+
 function Icon({ name }: { name: string }) {
   switch (name) {
     case 'clipboard':
@@ -95,6 +117,18 @@ function Icon({ name }: { name: string }) {
           <path d="M20 12H5M11 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       )
+    case 'check':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+          <path d="M5 12.5l4.5 4.5L19 7" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )
+    case 'dot':
+      return (
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="12" r="4" />
+        </svg>
+      )
     default:
       return null
   }
@@ -115,14 +149,18 @@ export default function SignupFlow({
   const [shake, setShake] = useState(false)
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
+  const [senhaTouched, setSenhaTouched] = useState(false)
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true))
     return () => cancelAnimationFrame(t)
   }, [])
 
+  const passwordChecks = getPasswordChecks(form.senha)
+  const senhaValid = isPasswordValid(passwordChecks)
+
   const step1Valid =
-    form.nome.trim().length > 1 && form.estado !== '' && form.email.includes('@') && form.senha.length >= 8
+    form.nome.trim().length > 1 && form.estado !== '' && form.email.includes('@') && senhaValid
   const step2Valid = form.interesses.length > 0
 
   function goTo(next: 1 | 2 | 3, dir: 1 | -1) {
@@ -132,6 +170,7 @@ export default function SignupFlow({
 
   function handleContinueStep1() {
     if (!step1Valid) {
+      setSenhaTouched(true)
       triggerShake()
       return
     }
@@ -236,6 +275,9 @@ export default function SignupFlow({
                   showPassword={showPassword}
                   setShowPassword={setShowPassword}
                   onContinue={handleContinueStep1}
+                  passwordChecks={passwordChecks}
+                  senhaTouched={senhaTouched}
+                  onSenhaTouched={() => setSenhaTouched(true)}
                 />
               )}
               {step === 2 && (
@@ -299,12 +341,18 @@ function StepAccount({
   showPassword,
   setShowPassword,
   onContinue,
+  passwordChecks,
+  senhaTouched,
+  onSenhaTouched,
 }: {
   form: FormData
   setForm: Dispatch<SetStateAction<FormData>>
   showPassword: boolean
   setShowPassword: (v: boolean) => void
   onContinue: () => void
+  passwordChecks: PasswordChecks
+  senhaTouched: boolean
+  onSenhaTouched: () => void
 }) {
   return (
     <form
@@ -362,6 +410,7 @@ function StepAccount({
             placeholder="Mínimo 8 caracteres"
             value={form.senha}
             onChange={(e) => setForm((f) => ({ ...f, senha: e.target.value }))}
+            onBlur={onSenhaTouched}
             autoComplete="new-password"
           />
           <button
@@ -373,6 +422,8 @@ function StepAccount({
             <Icon name={showPassword ? 'eyeOff' : 'eye'} />
           </button>
         </div>
+
+        <PasswordRequirements checks={passwordChecks} touched={senhaTouched} />
       </label>
 
       <div className="pde-actions pde-actions--center">
@@ -381,6 +432,41 @@ function StepAccount({
         </button>
       </div>
     </form>
+  )
+}
+
+function PasswordRequirements({
+  checks,
+  touched,
+}: {
+  checks: PasswordChecks
+  touched: boolean
+}) {
+  const items: { key: keyof PasswordChecks; label: string }[] = [
+    { key: 'length', label: 'Mínimo de 8 caracteres' },
+    { key: 'upper', label: '1 letra maiúscula' },
+    { key: 'lower', label: '1 letra minúscula' },
+    { key: 'special', label: '1 caractere especial' },
+  ]
+
+  return (
+    <ul className="pde-pw-reqs" aria-live="polite">
+      {items.map((item) => {
+        const met = checks[item.key]
+        const showInvalid = touched && !met
+        return (
+          <li
+            key={item.key}
+            className={`pde-pw-reqs__item ${met ? 'is-met' : ''} ${showInvalid ? 'is-invalid' : ''}`}
+          >
+            <span className="pde-pw-reqs__icon">
+              <Icon name={met ? 'check' : 'dot'} />
+            </span>
+            {item.label}
+          </li>
+        )
+      })}
+    </ul>
   )
 }
 

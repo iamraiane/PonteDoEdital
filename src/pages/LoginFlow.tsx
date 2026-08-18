@@ -15,7 +15,7 @@ type LoginData = {
   senha: string
 }
 
-const initialForm: LoginData = {
+const initialForm: LoginData = {  
   email: '',
   senha: '',
 }
