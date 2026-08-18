@@ -46,6 +46,30 @@ html, body {
     grid-template-rows: auto 1fr;
     overflow-y: auto;
   }
+
+  /* colapsa o painel institucional numa barra compacta no topo, só com a logo */
+  .pde-side {
+    padding: 1.2rem 1.5rem;
+    overflow: visible;
+  }
+
+  .pde-side__inner {
+    min-height: 0;
+  }
+
+  .pde-side__body,
+  .pde-copyright {
+    display: none;
+  }
+
+  .pde-brand__icon,
+  .pde-brand__logo {
+    height: 2.3rem;
+  }
+
+  .pde-form-panel {
+    padding: 2rem 1.5rem;
+  }
 }
 
 /* ---------- lado esquerdo (institucional) ---------- */
@@ -67,12 +91,6 @@ html, body {
 
 .pde-side::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Edge */
-}
-
-@media (max-width: 880px) {
-  .pde-side {
-    padding: 2.4rem 1.6rem;
-  }
 }
 
 .pde-side__inner {
@@ -736,24 +754,16 @@ html, body {
 
 @media (max-width: 480px) {
   .pde-side {
-    padding: 1.8rem 1.3rem;
+    padding: 1rem 1.2rem;
   }
 
   .pde-brand__icon,
   .pde-brand__logo {
-    height: 2.6rem;
-  }
-
-  .pde-side__body {
-    margin-top: 1.6rem;
-  }
-
-  .pde-headline {
-    font-size: 1.5rem;
+    height: 2rem;
   }
 
   .pde-form-panel {
-    padding: 1.8rem 1.2rem;
+    padding: 1.6rem 1.2rem;
   }
 
   .pde-actions--center .pde-btn--primary {
@@ -766,29 +776,12 @@ html, body {
 
 @media (max-width: 390px) {
   .pde-side {
-    padding: 1.4rem 1rem;
+    padding: 0.85rem 1rem;
   }
 
   .pde-brand__icon,
   .pde-brand__logo {
-    height: 2.2rem;
-  }
-
-  .pde-side__body {
-    margin-top: 1.2rem;
-  }
-
-  .pde-headline {
-    font-size: 1.3rem;
-  }
-
-  .pde-sub {
-    font-size: 0.88rem;
-    margin-bottom: 1.6rem;
-  }
-
-  .pde-features__item {
-    font-size: 0.82rem;
+    height: 1.8rem;
   }
 
   .pde-form-panel {
