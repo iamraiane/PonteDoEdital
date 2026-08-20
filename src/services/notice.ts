@@ -1,19 +1,14 @@
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
 
-type StateApi = { id: number; name: string; code: string }
-type AreaApi = { id: number; name: string }
-
 export type NoticeApi = {
   id: number
   title: string
+  state: string | null
+  state_code: string | null
   description: string | null
-  publication_date: string | null
   link: string
+  publication_date: string | null
   created_at: string
-  state_id: number | null
-  area_id: number | null
-  state?: StateApi
-  area?: AreaApi
 }
 
 async function authRequest<T>(path: string, init?: RequestInit): Promise<T> {

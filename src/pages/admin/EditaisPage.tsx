@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DashIcon } from '../dashboard/Icons'
+import { getNotices, type NoticeApi } from '../../services/notice'
 import './EditaisPage.css'
 
 type Edital = {
@@ -14,18 +15,35 @@ type Edital = {
 const CATEGORIAS = ['Infraestrutura', 'Saúde', 'Educação', 'Tecnologia', 'Serviços']
 const MODALIDADES = ['Concorrência', 'Pregão', 'Tomada de Preços', 'Convite']
 
-const INITIAL_EDITAIS: Edital[] = Array.from({ length: 6 }).map((_, i) => ({
-  id: `edital-${i + 1}`,
-  titulo: 'Reforma do Complexo Esportivo Municipal',
-  orgao: 'Candido Rodrigues / SP',
-  categoria: 'Infraestrutura',
-  modalidade: 'Concorrência',
-  prazo: '03 Ago 2026',
-}))
+function mapNoticeToEdital(n: NoticeApi): Edital {
+  const dateStr = n.publication_date
+  let prazo = 'Sem prazo'
+  if (dateStr) {
+    prazo = new Date(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+  }
+  return {
+    id: String(n.id),
+    titulo: n.description?.split('\n')[0]?.substring(0, 80) ?? n.title,
+    orgao: n.state ?? 'Órgão não informado',
+    categoria: 'Geral',
+    modalidade: 'Edital Público',
+    prazo,
+  }
+}
 
 export default function EditaisPage() {
-  const [editais, setEditais] = useState<Edital[]>(INITIAL_EDITAIS)
+  const [editais, setEditais] = useState<Edital[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [busca, setBusca] = useState('')
+
+  useEffect(() => {
+    setLoading(true)
+    getNotices()
+      .then((data) => setEditais(data.map(mapNoticeToEdital)))
+      .catch(() => setError('Erro ao carregar editais'))
+      .finally(() => setLoading(false))
+  }, [])
   const [menuAberto, setMenuAberto] = useState<string | null>(null)
   const [editando, setEditando] = useState<Edital | null>(null)
   const [excluindo, setExcluindo] = useState<Edital | null>(null)
@@ -71,6 +89,10 @@ export default function EditaisPage() {
         </label>
       </div>
 
+      {loading && <p>Carregando editais...</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+
+      {!loading && (
       <div className="pda-table-wrap">
         <table className="pda-table">
           <thead>
@@ -137,6 +159,7 @@ export default function EditaisPage() {
           </tbody>
         </table>
       </div>
+      )}
 
       {editando && (
         <EditarEditalModal

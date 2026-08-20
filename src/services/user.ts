@@ -70,3 +70,18 @@ export async function register(name: string, email: string, password: string): P
 export async function getUserSubscription(id: number): Promise<SubscriptionData> {
   return authRequest<SubscriptionData>(`users/${id}/subscription`)
 }
+
+export async function getUserById(id: number): Promise<UserData> {
+  return authRequest<UserData>(`users/${id}`)
+}
+
+export function getTokenPayload(): { id: number; role: string } | null {
+  const token = localStorage.getItem('token')
+  if (!token) return null
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return { id: payload.id, role: payload.role }
+  } catch {
+    return null
+  }
+}

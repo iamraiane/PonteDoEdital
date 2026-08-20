@@ -3,7 +3,11 @@ import { DashIcon, DashAvatar } from './Icons'
 import './FeedPage.css'
 import { getNotices, type NoticeApi } from '../../services/notice'
 
-const CATEGORIAS = ['Todos', 'Infraestrutura', 'Tecnologia', 'Saúde', 'Cultura', 'Serviços']
+const ESTADOS = [
+  'Todos', 'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
+  'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS',
+  'RO', 'RR', 'SC', 'SP', 'SE', 'TO',
+]
 
 type Edital = {
   id: string
@@ -15,6 +19,7 @@ type Edital = {
   titulo: string
   descricao: string
   prazo: string
+  link: string
 }
 
 function formatTimeAgo(dateStr: string | null): string {
@@ -36,30 +41,23 @@ function formatDate(dateStr: string | null): string {
   return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
-function extractOrgName(link: string): string {
-  if (!link) return 'Órgão não informado'
-  const match = link.match(/^([A-ZÀ-Ú\s\-\.]+?)(?:\s+[A-Z]{2}\d|\s+[A-Z]{2}\s)/)
-  if (match) return match[1].trim()
-  const parts = link.split(/\s{2,}/)
-  return parts[0]?.trim() || link.substring(0, 60)
-}
-
 function mapNoticeToEdital(n: NoticeApi): Edital {
   return {
     id: String(n.id),
-    orgao: n.area?.name ?? extractOrgName(n.link),
-    local: n.state?.name ?? n.state?.code ?? 'Local não informado',
+    orgao: n.title,
+    local: n.state ?? 'Local não informado',
     tempo: formatTimeAgo(n.created_at),
-    tag: n.area?.name ?? 'Geral',
+    tag: n.state_code ?? n.state ?? '',
     tipo: 'Edital Público',
     titulo: n.description?.split('\n')[0]?.substring(0, 80) ?? n.title,
     descricao: n.description ?? '',
     prazo: formatDate(n.publication_date),
+    link: n.link,
   }
 }
 
 export default function FeedPage({ userName }: { userName: string }) {
-  const [categoria, setCategoria] = useState('Todos')
+  const [estado, setEstado] = useState('Todos')
   const [salvos, setSalvos] = useState<Record<string, boolean>>({})
   const [agendados, setAgendados] = useState<Record<string, boolean>>({})
   const [editais, setEditais] = useState<Edital[]>([])
@@ -83,7 +81,7 @@ export default function FeedPage({ userName }: { userName: string }) {
   }
 
   const filteredEditais =
-    categoria === 'Todos' ? editais : editais.filter((e) => e.tag === categoria)
+    estado === 'Todos' ? editais : editais.filter((e) => e.tag === estado)
 
   return (
     <div className="pdd-feed">
@@ -92,14 +90,14 @@ export default function FeedPage({ userName }: { userName: string }) {
       </h1>
 
       <div className="pdd-filters">
-        {CATEGORIAS.map((c) => (
+        {ESTADOS.map((e) => (
           <button
-            key={c}
+            key={e}
             type="button"
-            className={`pdd-pill ${categoria === c ? 'is-active' : ''}`}
-            onClick={() => setCategoria(c)}
+            className={`pdd-pill ${estado === e ? 'is-active' : ''}`}
+            onClick={() => setEstado(e)}
           >
-            {c}
+            {e}
           </button>
         ))}
       </div>
@@ -158,7 +156,7 @@ export default function FeedPage({ userName }: { userName: string }) {
 
             <div className="pdd-edital-card__footer">
               <span><DashIcon name="clock" /> Prazo: {e.prazo}</span>
-              <a href="#detalhes">Ver detalhes <DashIcon name="arrow" /></a>
+              <a href={e.link} target="_blank" rel="noopener noreferrer">Ver detalhes <DashIcon name="arrow" /></a>
             </div>
           </article>
         ))}

@@ -1,7 +1,7 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import logoNome from '../assets/logo-nome.png'
 import logoPonte from '../assets/logo-ponte.png'
-import { login } from '../services/user'
+import { login, getTokenPayload, getUserById } from '../services/user'
 import './LoginFlow.css'
 
 const FEATURES = [
@@ -88,7 +88,7 @@ export default function LoginFlow({
 }: {
   onSwitchToSignup?: () => void
   onSwitchToRecover?: () => void
-  onLoginSuccess?: () => void
+  onLoginSuccess?: (userName: string) => void
 } = {}) {
   const [form, setForm] = useState<LoginData>(initialForm)
   const [showPassword, setShowPassword] = useState(false)
@@ -125,11 +125,20 @@ export default function LoginFlow({
     setErrorMessage('')
 
     login(form.email, form.senha)
-      .then((data) => {
+      .then(async (data) => {
         localStorage.setItem('token', data.token)
+        localStorage.setItem('loginTime', String(Date.now()))
+        const payload = getTokenPayload()
+        let nome = 'Usuário'
+        if (payload?.id) {
+          try {
+            const user = await getUserById(payload.id)
+            nome = user.name
+          } catch {}
+        }
         setStatus('success')
         window.setTimeout(() => {
-          if (onLoginSuccess) onLoginSuccess()
+          if (onLoginSuccess) onLoginSuccess(nome)
         }, 1300)
       })
       .catch((err) => {
