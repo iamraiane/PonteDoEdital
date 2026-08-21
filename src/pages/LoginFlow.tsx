@@ -141,9 +141,9 @@ export default function LoginFlow({
           if (onLoginSuccess) onLoginSuccess(nome)
         }, 1300)
       })
-      .catch((err) => {
+      .catch(() => {
         setStatus('error')
-        setErrorMessage(err.message || 'Erro ao fazer login')
+        setErrorMessage('Email ou senha inválidos')
         triggerShake()
       })
   }
