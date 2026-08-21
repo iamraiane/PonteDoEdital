@@ -26,6 +26,7 @@ type FormData = {
   estado: string
   email: string
   senha: string
+  confirmarSenha: string
   interesses: string[]
 }
 
@@ -34,6 +35,7 @@ const initialForm: FormData = {
   estado: '',
   email: '',
   senha: '',
+  confirmarSenha: '',
   interesses: [],
 }
 
@@ -150,6 +152,7 @@ export default function SignupFlow({
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
   const [senhaTouched, setSenhaTouched] = useState(false)
+  const [confirmarSenhaTouched, setConfirmarSenhaTouched] = useState(false)
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true))
@@ -158,9 +161,14 @@ export default function SignupFlow({
 
   const passwordChecks = getPasswordChecks(form.senha)
   const senhaValid = isPasswordValid(passwordChecks)
+  const senhasCoincidem = form.confirmarSenha.length > 0 && form.confirmarSenha === form.senha
 
   const step1Valid =
-    form.nome.trim().length > 1 && form.estado !== '' && form.email.includes('@') && senhaValid
+    form.nome.trim().length > 1 &&
+    form.estado !== '' &&
+    form.email.includes('@') &&
+    senhaValid &&
+    senhasCoincidem
   const step2Valid = form.interesses.length > 0
 
   function goTo(next: 1 | 2 | 3, dir: 1 | -1) {
@@ -171,6 +179,7 @@ export default function SignupFlow({
   function handleContinueStep1() {
     if (!step1Valid) {
       setSenhaTouched(true)
+      setConfirmarSenhaTouched(true)
       triggerShake()
       return
     }
@@ -278,6 +287,9 @@ export default function SignupFlow({
                   passwordChecks={passwordChecks}
                   senhaTouched={senhaTouched}
                   onSenhaTouched={() => setSenhaTouched(true)}
+                  senhasCoincidem={senhasCoincidem}
+                  confirmarSenhaTouched={confirmarSenhaTouched}
+                  onConfirmarSenhaTouched={() => setConfirmarSenhaTouched(true)}
                 />
               )}
               {step === 2 && (
@@ -344,6 +356,9 @@ function StepAccount({
   passwordChecks,
   senhaTouched,
   onSenhaTouched,
+  senhasCoincidem,
+  confirmarSenhaTouched,
+  onConfirmarSenhaTouched,
 }: {
   form: FormData
   setForm: Dispatch<SetStateAction<FormData>>
@@ -353,7 +368,12 @@ function StepAccount({
   passwordChecks: PasswordChecks
   senhaTouched: boolean
   onSenhaTouched: () => void
+  senhasCoincidem: boolean
+  confirmarSenhaTouched: boolean
+  onConfirmarSenhaTouched: () => void
 }) {
+  const showConfirmInvalid = confirmarSenhaTouched && form.confirmarSenha.length > 0 && !senhasCoincidem
+
   return (
     <form
       className="pde-fields"
@@ -362,6 +382,9 @@ function StepAccount({
         onContinue()
       }}
     >
+      {showConfirmInvalid && (
+        <p className="pde-error">As senhas não coincidem</p>
+      )}
       <div className="pde-row">
         <label className="pde-field pde-field--grow">
           <span>Nome Completo</span>
@@ -402,29 +425,55 @@ function StepAccount({
         </div>
       </label>
 
-      <label className="pde-field">
-        <span>Senha</span>
-        <div className="pde-input-icon">
-          <input
-            type={showPassword ? 'text' : 'password'}
-            placeholder="Mínimo 8 caracteres"
-            value={form.senha}
-            onChange={(e) => setForm((f) => ({ ...f, senha: e.target.value }))}
-            onBlur={onSenhaTouched}
-            autoComplete="new-password"
-          />
-          <button
-            type="button"
-            className="pde-input-icon__glyph pde-input-icon__glyph--btn"
-            onClick={() => setShowPassword(!showPassword)}
-            aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-          >
-            <Icon name={showPassword ? 'eyeOff' : 'eye'} />
-          </button>
+      <div className="pde-password-block">
+        <div className="pde-row">
+          <label className="pde-field pde-field--grow">
+            <span>Senha</span>
+            <div className="pde-input-icon">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Mínimo 8 caracteres"
+                value={form.senha}
+                onChange={(e) => setForm((f) => ({ ...f, senha: e.target.value }))}
+                onBlur={onSenhaTouched}
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                className="pde-input-icon__glyph pde-input-icon__glyph--btn"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+              >
+                <Icon name={showPassword ? 'eyeOff' : 'eye'} />
+              </button>
+            </div>
+          </label>
+
+          <label className="pde-field pde-field--grow">
+            <span>Confirmar Senha</span>
+            <div className={`pde-input-icon ${showConfirmInvalid ? 'has-error' : ''}`}>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Repita a senha"
+                value={form.confirmarSenha}
+                onChange={(e) => setForm((f) => ({ ...f, confirmarSenha: e.target.value }))}
+                onBlur={onConfirmarSenhaTouched}
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                className="pde-input-icon__glyph pde-input-icon__glyph--btn"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+              >
+                <Icon name={showPassword ? 'eyeOff' : 'eye'} />
+              </button>
+            </div>
+          </label>
         </div>
 
         <PasswordRequirements checks={passwordChecks} touched={senhaTouched} />
-      </label>
+      </div>
 
       <div className="pde-actions pde-actions--center">
         <button type="submit" className="pde-btn pde-btn--primary">
