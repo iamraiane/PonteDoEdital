@@ -52,8 +52,8 @@ export default function DashboardApp({
       onLogout={onLogout}
       onOpenAdmin={onOpenAdmin}
     >
-      {page === 'feed' && <FeedPage userName={firstName} hasPremium={hasPremium} onNavigate={setPage} />}
-      {page === 'calendar' && <CalendarPage hasPremium={hasPremium} onNavigate={setPage} />}
+      {page === 'feed' && (<FeedPage userName={firstName} hasPremium={hasPremium} onNavigate={(newPage) => setPage(newPage as PageKey)} /> )}
+      {page === 'calendar' && ( <CalendarPage hasPremium={hasPremium} onNavigate={(newPage) => setPage(newPage as PageKey)} /> )}
       {page === 'saved' && <SavedPage />}
       {page === 'plans' && <PlansPage />}
       {page === 'faq' && <FaqPage />}
