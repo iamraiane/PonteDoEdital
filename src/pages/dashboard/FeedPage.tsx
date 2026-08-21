@@ -22,6 +22,13 @@ type Edital = {
   link: string
 }
 
+function getGreeting(): string {
+  const hour = new Date().getHours()
+  if (hour >= 12 && hour < 18) return 'Boa tarde'
+  if (hour >= 18 || hour < 5) return 'Boa noite'
+  return 'Bom dia'
+}
+
 function formatTimeAgo(dateStr: string | null): string {
   if (!dateStr) return ''
   const date = new Date(dateStr)
@@ -86,7 +93,7 @@ export default function FeedPage({ userName }: { userName: string }) {
   return (
     <div className="pdd-feed">
       <h1 className="pdd-greeting">
-        Bom dia, <span>{userName}</span>
+        {getGreeting()}, <span>{userName}</span>
       </h1>
 
       <div className="pdd-filters">
