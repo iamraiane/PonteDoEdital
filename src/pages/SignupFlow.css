@@ -41,15 +41,26 @@ html, body {
 }
 
 @media (max-width: 880px) {
+  /* em telas estreitas o layout deixa de ser "fixed/100vh" e passa a fluir
+     como um documento normal, com o scroll do próprio navegador. Isso evita
+     que elementos (botão, link de login etc.) fiquem presos/cortados fora
+     de containers com scroll aninhado, que nem sempre funcionam bem em
+     todos os navegadores/dispositivos móveis. */
   .pde-shell {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-    overflow-y: auto;
+    position: static;
+    inset: auto;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
   }
 
   /* colapsa o painel institucional numa barra compacta no topo, só com a logo */
   .pde-side {
-    padding: 1.2rem 1.5rem;
+    flex: 0 0 auto;
+    padding: 1rem 1.2rem;
     overflow: visible;
   }
 
@@ -64,11 +75,14 @@ html, body {
 
   .pde-brand__icon,
   .pde-brand__logo {
-    height: 2.3rem;
+    height: 2rem;
   }
 
   .pde-form-panel {
-    padding: 2.75rem 1.5rem 2rem;
+    flex: 1 1 auto;
+    padding: 2rem 1.5rem 2.5rem;
+    align-items: flex-start;
+    overflow: visible;
   }
 }
 
@@ -225,8 +239,9 @@ html, body {
 .pde-form-panel {
   background: var(--bg);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 2.5rem 2rem;
   overflow-y: auto;
 }
@@ -312,7 +327,7 @@ html, body {
 
 .pde-stage {
   position: relative;
-  min-height: 6rem;
+  min-height: 8rem;
 }
 
 .pde-stage--shake {
@@ -807,12 +822,25 @@ html, body {
   }
 
   .pde-form-panel {
-    padding: 2.2rem 1.2rem 1.6rem;
+    padding: 1.2rem 0.8rem 1rem;
+  }
+
+  .pde-stage {
+    min-height: auto;
   }
 
   .pde-actions--center .pde-btn--primary {
     width: 100%;
     min-width: 0;
+  }
+
+  .pde-password-block .pde-row {
+    flex-direction: column;
+  }
+
+  .pde-pw-reqs {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
   }
 }
 
@@ -829,46 +857,65 @@ html, body {
   }
 
   .pde-form-panel {
-    padding: 2rem 1rem 1.4rem;
+    padding: 2rem 1.5rem 1.5rem;
+    overflow-y: auto;
+  }
+
+  .pde-form-header {
+    margin-bottom: 1rem;
   }
 
   .pde-form-header h2 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
   }
 
-  .pde-stepper__dot {
-    width: 36px;
-    height: 36px;
+  .pde-form-header p {
     font-size: 0.85rem;
   }
 
+  .pde-stepper {
+    margin-bottom: 1rem;
+  }
+
+  .pde-stepper__dot {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+  }
+
   .pde-fields {
-    gap: 0.9rem;
+    gap: 0.75rem;
   }
 
   .pde-field {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
   }
 
   .pde-field input,
   .pde-field select {
-    padding: 0.65rem 0.8rem;
-    font-size: 0.88rem;
+    padding: 0.6rem 0.7rem;
+    font-size: 0.85rem;
   }
 
   .pde-btn {
-    padding: 0.7rem 1.2rem;
-    font-size: 0.88rem;
+    padding: 0.65rem 1rem;
+    font-size: 0.85rem;
   }
 
   .pde-tag {
-    padding: 0.65rem 0.4rem;
-    font-size: 0.82rem;
+    padding: 0.6rem 0.35rem;
+    font-size: 0.78rem;
   }
 
   .pde-login-hint {
+    font-size: 0.78rem;
+    margin-top: 1rem;
+  }
+
+  .pde-error {
     font-size: 0.8rem;
-    margin-top: 1.4rem;
+    padding: 0.5rem 0.7rem;
+    margin-bottom: 0.3rem;
   }
 }
 
