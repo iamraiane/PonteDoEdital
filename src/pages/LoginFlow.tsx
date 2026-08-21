@@ -96,6 +96,7 @@ export default function LoginFlow({
   const [shake, setShake] = useState(false)
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
+  const [errorKey, setErrorKey] = useState(0)
   const [touched, setTouched] = useState(false)
 
   useEffect(() => {
@@ -123,6 +124,7 @@ export default function LoginFlow({
 
     setStatus('loading')
     setErrorMessage('')
+    setShake(false)
 
     login(form.email, form.senha)
       .then(async (data) => {
@@ -144,6 +146,7 @@ export default function LoginFlow({
       .catch(() => {
         setStatus('error')
         setErrorMessage('Email ou senha inválidos')
+        setErrorKey((k) => k + 1)
         triggerShake()
       })
   }
@@ -211,7 +214,7 @@ export default function LoginFlow({
                 noValidate
               >
                 {status === 'error' && (
-                  <p className="pde-error">{errorMessage}</p>
+                  <p key={errorKey} className="pde-error">{errorMessage}</p>
                 )}
                 <label className="pde-field">
                   <span>E-mail</span>
