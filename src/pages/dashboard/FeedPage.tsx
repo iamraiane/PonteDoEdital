@@ -63,7 +63,7 @@ function mapNoticeToEdital(n: NoticeApi): Edital {
   }
 }
 
-export default function FeedPage({ userName }: { userName: string }) {
+export default function FeedPage({ userName, hasPremium = false, onNavigate }: { userName: string; hasPremium?: boolean; onNavigate?: (page: string) => void }) {
   const [estado, setEstado] = useState('Todos')
   const [salvos, setSalvos] = useState<Record<string, boolean>>({})
   const [agendados, setAgendados] = useState<Record<string, boolean>>({})
@@ -146,10 +146,11 @@ export default function FeedPage({ userName }: { userName: string }) {
               <button
                 type="button"
                 className={`pdd-btn-outline ${agendados[e.id] ? 'is-done' : ''}`}
-                onClick={() => agendar(e.id)}
+                onClick={() => hasPremium ? agendar(e.id) : onNavigate?.('plans')}
               >
                 <DashIcon name="schedule" />
                 {agendados[e.id] ? 'Agendado' : 'Agendar prazo'}
+                {!hasPremium && <span className="pdd-btn-outline__trophy"><DashIcon name="trophy" /></span>}
               </button>
               <button
                 type="button"

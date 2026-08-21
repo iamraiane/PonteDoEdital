@@ -201,6 +201,38 @@
   border-color: var(--teal-light);
 }
 
+.pdd-btn-outline--premium {
+  opacity: 0.55;
+  cursor: pointer;
+  border-color: var(--muted);
+  color: var(--muted);
+  justify-content: space-between;
+}
+
+.pdd-btn-outline--premium:hover {
+  background: rgba(0, 212, 194, 0.12);
+  transform: translateY(-1px);
+}
+
+.pdd-btn-outline__trophy {
+  display: inline-flex;
+  align-items: center;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: #f5a623;
+}
+
+.pdd-btn-outline__trophy svg {
+  width: 14px;
+  height: 14px;
+}
+
+.pdd-btn-outline__trophy img {
+  width: 14px !important;
+  height: 14px !important;
+}
+
 .pdd-bookmark-btn {
   flex-shrink: 0;
   width: 2.5rem;

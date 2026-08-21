@@ -52,7 +52,7 @@ export default function DashboardApp({
       onLogout={onLogout}
       onOpenAdmin={onOpenAdmin}
     >
-      {page === 'feed' && <FeedPage userName={firstName} />}
+      {page === 'feed' && <FeedPage userName={firstName} hasPremium={hasPremium} onNavigate={setPage} />}
       {page === 'calendar' && <CalendarPage hasPremium={hasPremium} onNavigate={setPage} />}
       {page === 'saved' && <SavedPage />}
       {page === 'plans' && <PlansPage />}
