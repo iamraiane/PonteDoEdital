@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import SignupFlow from './pages/SignupFlow'
 import LoginFlow from './pages/LoginFlow'
 import RecoverFlow from './pages/RecoverFlow'
@@ -6,13 +7,31 @@ import DashboardApp from './pages/dashboard/DashboardApp'
 import AdminApp from './pages/admin/AdminApp'
 import { getTokenPayload, getUserById } from './services/user'
 
-type Screen = 'login' | 'signup' | 'recover' | 'dashboard' | 'admin'
-
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const token = localStorage.getItem('token')
+  const loginTime = localStorage.getItem('loginTime')
+
+  if (!token || !loginTime) return <Navigate to="/login" replace />
+  if (Date.now() - Number(loginTime) > THREE_DAYS_MS) {
+    localStorage.removeItem('token')
+    localStorage.removeItem('loginTime')
+    return <Navigate to="/login" replace />
+  }
+  const payload = getTokenPayload()
+  if (!payload?.id) {
+    localStorage.removeItem('token')
+    localStorage.removeItem('loginTime')
+    return <Navigate to="/login" replace />
+  }
+
+  return <>{children}</>
+}
+
 function App() {
-  const [screen, setScreen] = useState<Screen>('signup')
   const [userName, setUserName] = useState('')
+  const [userId, setUserId] = useState<number | undefined>()
   const [checking, setChecking] = useState(true)
 
   useEffect(() => {
@@ -21,16 +40,13 @@ function App() {
 
     if (!token || !loginTime) {
       setChecking(false)
-      setScreen('login')
       return
     }
 
-    const elapsed = Date.now() - Number(loginTime)
-    if (elapsed > THREE_DAYS_MS) {
+    if (Date.now() - Number(loginTime) > THREE_DAYS_MS) {
       localStorage.removeItem('token')
       localStorage.removeItem('loginTime')
       setChecking(false)
-      setScreen('login')
       return
     }
 
@@ -39,77 +55,62 @@ function App() {
       localStorage.removeItem('token')
       localStorage.removeItem('loginTime')
       setChecking(false)
-      setScreen('login')
       return
     }
 
     getUserById(payload.id)
       .then((user) => {
         setUserName(user.name)
-        setScreen('dashboard')
+        setUserId(user.id)
       })
       .catch(() => {
         localStorage.removeItem('token')
         localStorage.removeItem('loginTime')
-        setScreen('login')
       })
       .finally(() => setChecking(false))
   }, [])
 
+  function handleLogout() {
+    localStorage.removeItem('token')
+    localStorage.removeItem('loginTime')
+    window.location.href = '/login'
+  }
+
   if (checking) return null
 
-  if (screen === 'login') {
-    return (
-      <LoginFlow
-        onSwitchToSignup={() => setScreen('signup')}
-        onSwitchToRecover={() => setScreen('recover')}
-        onLoginSuccess={(nome) => {
-          setUserName(nome)
-          setScreen('dashboard')
-        }}
-      />
-    )
-  }
-
-  if (screen === 'recover') {
-    return <RecoverFlow onSwitchToLogin={() => setScreen('login')} />
-  }
-
-  if (screen === 'admin') {
-    return (
-      <AdminApp
-        onExitAdmin={() => setScreen('dashboard')}
-        onLogout={() => {
-          localStorage.removeItem('token')
-          localStorage.removeItem('loginTime')
-          setScreen('login')
-        }}
-      />
-    )
-  }
-
-  if (screen === 'dashboard') {
-    return (
-      <DashboardApp
-        userName={userName}
-        onLogout={() => {
-          localStorage.removeItem('token')
-          localStorage.removeItem('loginTime')
-          setScreen('login')
-        }}
-        onOpenAdmin={() => setScreen('admin')}
-      />
-    )
-  }
-
   return (
-    <SignupFlow
-      onSwitchToLogin={() => setScreen('login')}
-      onFinish={(nome) => {
-        setUserName(nome)
-        setScreen('dashboard')
-      }}
-    />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginFlow />} />
+        <Route path="/signup" element={<SignupFlow />} />
+        <Route path="/recover" element={<RecoverFlow />} />
+        <Route
+          path="/dashboard/*"
+          element={
+            <ProtectedRoute>
+              <DashboardApp
+                userName={userName}
+                userId={userId}
+                onLogout={handleLogout}
+                onOpenAdmin={() => window.location.href = '/admin'}
+              />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/*"
+          element={
+            <ProtectedRoute>
+              <AdminApp
+                onExitAdmin={() => window.location.href = '/dashboard'}
+                onLogout={handleLogout}
+              />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 

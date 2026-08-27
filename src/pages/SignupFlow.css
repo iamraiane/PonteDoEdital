@@ -695,6 +695,14 @@ html, body {
   margin-bottom: 0.5rem;
 }
 
+.pde-field-error {
+  display: block;
+  color: var(--danger);
+  font-size: 0.78rem;
+  margin-top: 0.3rem;
+  padding-left: 0.1rem;
+}
+
 /* ---------- etapa 2: interesses ---------- */
 
 .pde-question {

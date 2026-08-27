@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import logoNome from '../assets/logo-nome.png'
 import logoPonte from '../assets/logo-ponte.png'
 import './RecoverFlow.css'
@@ -47,7 +48,8 @@ function Icon({ name }: { name: string }) {
   }
 }
 
-export default function RecoverFlow({ onSwitchToLogin }: { onSwitchToLogin?: () => void } = {}) {
+export default function RecoverFlow() {
+  const navigate = useNavigate()
   const [mounted, setMounted] = useState(false)
   const [step, setStep] = useState<Step>('email')
   const [email, setEmail] = useState('')
@@ -132,8 +134,8 @@ export default function RecoverFlow({ onSwitchToLogin }: { onSwitchToLogin?: () 
       <main className="pde-form-panel">
         <div className="pde-form-panel__inner">
           <header className="pde-form-header">
-            <h2>De volta</h2>
-            <p><span>ao Ponte do Edital</span></p>
+            <h2>Recupere sua</h2>
+            <p><span>senha</span></p>
           </header>
 
           <div className={`pde-stage ${shake ? 'pde-stage--shake' : ''}`}>
@@ -179,10 +181,8 @@ export default function RecoverFlow({ onSwitchToLogin }: { onSwitchToLogin?: () 
                   <a
                     href="#entrar"
                     onClick={(ev) => {
-                      if (onSwitchToLogin) {
-                        ev.preventDefault()
-                        onSwitchToLogin()
-                      }
+                      ev.preventDefault()
+                      navigate('/login')
                     }}
                   >
                     Entrar na plataforma <Icon name="arrow" />
@@ -253,7 +253,7 @@ export default function RecoverFlow({ onSwitchToLogin }: { onSwitchToLogin?: () 
                     <button
                       type="button"
                       className="pde-btn pde-btn--primary"
-                      onClick={() => onSwitchToLogin && onSwitchToLogin()}
+                      onClick={() => navigate('/login')}
                     >
                       Entrar na plataforma <Icon name="arrow" />
                     </button>

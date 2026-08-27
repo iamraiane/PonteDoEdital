@@ -1,7 +1,9 @@
 import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
+import { useNavigate } from 'react-router-dom'
 import logoNome from '../assets/logo-nome.png'
 import logoPonte from '../assets/logo-ponte.png'
 import { register } from '../services/user'
+import { sanitizeInput, sanitizeName, sanitizeEmail, validateName, validateEmail, validatePassword, validatePasswordMatch } from '../utils/validation'
 import './SignupFlow.css'
 
 const ESTADOS = [
@@ -32,7 +34,7 @@ type FormData = {
 
 const initialForm: FormData = {
   nome: '',
-  estado: '',
+  estado: 'SP',
   email: '',
   senha: '',
   confirmarSenha: '',
@@ -136,13 +138,8 @@ function Icon({ name }: { name: string }) {
   }
 }
 
-export default function SignupFlow({
-  onSwitchToLogin,
-  onFinish,
-}: {
-  onSwitchToLogin?: () => void
-  onFinish?: (nome: string) => void
-} = {}) {
+export default function SignupFlow() {
+  const navigate = useNavigate()
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [direction, setDirection] = useState<1 | -1>(1)
   const [form, setForm] = useState<FormData>(initialForm)
@@ -153,6 +150,9 @@ export default function SignupFlow({
   const [errorMessage, setErrorMessage] = useState('')
   const [senhaTouched, setSenhaTouched] = useState(false)
   const [confirmarSenhaTouched, setConfirmarSenhaTouched] = useState(false)
+  const [nomeError, setNomeError] = useState('')
+  const [emailError, setEmailError] = useState('')
+  const [senhaErrorMsg, setSenhaErrorMsg] = useState('')
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true))
@@ -164,9 +164,9 @@ export default function SignupFlow({
   const senhasCoincidem = form.confirmarSenha.length > 0 && form.confirmarSenha === form.senha
 
   const step1Valid =
-    form.nome.trim().length > 1 &&
+    validateName(form.nome) === null &&
     form.estado !== '' &&
-    form.email.includes('@') &&
+    validateEmail(form.email) === null &&
     senhaValid &&
     senhasCoincidem
   const step2Valid = form.interesses.length > 0
@@ -178,6 +178,8 @@ export default function SignupFlow({
 
   function handleContinueStep1() {
     if (!step1Valid) {
+      setNomeError(validateName(form.nome) || '')
+      setEmailError(validateEmail(form.email) || '')
       setSenhaTouched(true)
       setConfirmarSenhaTouched(true)
       triggerShake()
@@ -192,6 +194,29 @@ export default function SignupFlow({
       return
     }
     goTo(3, 1)
+  }
+
+  function handleNomeChange(value: string) {
+    const sanitized = sanitizeName(value)
+    setForm((f) => ({ ...f, nome: sanitized }))
+    setNomeError(validateName(sanitized) || '')
+  }
+
+  function handleEmailChange(value: string) {
+    const sanitized = sanitizeEmail(value)
+    setForm((f) => ({ ...f, email: sanitized }))
+    setEmailError(validateEmail(sanitized) || '')
+  }
+
+  function handleSenhaChange(value: string) {
+    const sanitized = sanitizeInput(value)
+    setForm((f) => ({ ...f, senha: sanitized }))
+    setSenhaErrorMsg(validatePassword(sanitized) || '')
+  }
+
+  function handleConfirmarSenhaChange(value: string) {
+    const sanitized = sanitizeInput(value)
+    setForm((f) => ({ ...f, confirmarSenha: sanitized }))
   }
 
   function triggerShake() {
@@ -215,8 +240,7 @@ export default function SignupFlow({
 
     register(form.nome, form.email, form.senha)
       .then(() => {
-        const firstName = form.nome.trim().split(' ')[0] || 'visitante'
-        if (onFinish) onFinish(firstName)
+        navigate('/login')
       })
       .catch((err) => {
         setStatus('error')
@@ -290,6 +314,13 @@ export default function SignupFlow({
                   senhasCoincidem={senhasCoincidem}
                   confirmarSenhaTouched={confirmarSenhaTouched}
                   onConfirmarSenhaTouched={() => setConfirmarSenhaTouched(true)}
+                  onNomeChange={handleNomeChange}
+                  onEmailChange={handleEmailChange}
+                  onSenhaChange={handleSenhaChange}
+                  onConfirmarSenhaChange={handleConfirmarSenhaChange}
+                  nomeError={nomeError}
+                  emailError={emailError}
+                  senhaErrorMsg={senhaErrorMsg}
                 />
               )}
               {step === 2 && (
@@ -317,10 +348,8 @@ export default function SignupFlow({
             <a
               href="#entrar"
               onClick={(e) => {
-                if (onSwitchToLogin) {
-                  e.preventDefault()
-                  onSwitchToLogin()
-                }
+                e.preventDefault()
+                navigate('/login')
               }}
             >
               Entrar na plataforma <Icon name="arrow" />
@@ -359,6 +388,13 @@ function StepAccount({
   senhasCoincidem,
   confirmarSenhaTouched,
   onConfirmarSenhaTouched,
+  onNomeChange,
+  onEmailChange,
+  onSenhaChange,
+  onConfirmarSenhaChange,
+  nomeError,
+  emailError,
+  senhaErrorMsg,
 }: {
   form: FormData
   setForm: Dispatch<SetStateAction<FormData>>
@@ -371,6 +407,13 @@ function StepAccount({
   senhasCoincidem: boolean
   confirmarSenhaTouched: boolean
   onConfirmarSenhaTouched: () => void
+  onNomeChange: (value: string) => void
+  onEmailChange: (value: string) => void
+  onSenhaChange: (value: string) => void
+  onConfirmarSenhaChange: (value: string) => void
+  nomeError: string
+  emailError: string
+  senhaErrorMsg: string
 }) {
   const showConfirmInvalid = confirmarSenhaTouched && form.confirmarSenha.length > 0 && !senhasCoincidem
 
@@ -392,9 +435,10 @@ function StepAccount({
             type="text"
             placeholder="Digite seu nome"
             value={form.nome}
-            onChange={(e) => setForm((f) => ({ ...f, nome: e.target.value }))}
+            onChange={(e) => onNomeChange(e.target.value)}
             autoComplete="name"
           />
+          {nomeError && <span className="pde-field-error">{nomeError}</span>}
         </label>
 
         <label className="pde-field pde-field--estado">
@@ -403,7 +447,6 @@ function StepAccount({
             value={form.estado}
             onChange={(e) => setForm((f) => ({ ...f, estado: e.target.value }))}
           >
-            <option value="" disabled></option>
             {ESTADOS.map((uf) => (
               <option key={uf} value={uf}>{uf}</option>
             ))}
@@ -418,11 +461,12 @@ function StepAccount({
             type="email"
             placeholder="pontedoedital@gmail.com"
             value={form.email}
-            onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+            onChange={(e) => onEmailChange(e.target.value)}
             autoComplete="email"
           />
           <span className="pde-input-icon__glyph"><Icon name="mail" /></span>
         </div>
+        {emailError && <span className="pde-field-error">{emailError}</span>}
       </label>
 
       <div className="pde-password-block">
@@ -434,7 +478,7 @@ function StepAccount({
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Mínimo 8 caracteres"
                 value={form.senha}
-                onChange={(e) => setForm((f) => ({ ...f, senha: e.target.value }))}
+                onChange={(e) => onSenhaChange(e.target.value)}
                 onBlur={onSenhaTouched}
                 autoComplete="new-password"
               />
@@ -447,6 +491,7 @@ function StepAccount({
                 <Icon name={showPassword ? 'eyeOff' : 'eye'} />
               </button>
             </div>
+            {senhaTouched && senhaErrorMsg && <span className="pde-field-error">{senhaErrorMsg}</span>}
           </label>
 
           <label className="pde-field pde-field--grow">
@@ -456,7 +501,7 @@ function StepAccount({
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Repita a senha"
                 value={form.confirmarSenha}
-                onChange={(e) => setForm((f) => ({ ...f, confirmarSenha: e.target.value }))}
+                onChange={(e) => onConfirmarSenhaChange(e.target.value)}
                 onBlur={onConfirmarSenhaTouched}
                 autoComplete="new-password"
               />
@@ -596,7 +641,7 @@ function StepDone({
           onClick={onFinish}
           disabled={status === 'loading'}
         >
-          <span className="pde-btn__label">Ir para o feed</span>
+          <span className="pde-btn__label">Criar conta</span>
           <Icon name="arrow" />
           <span className="pde-btn__spinner" aria-hidden="true" />
         </button>

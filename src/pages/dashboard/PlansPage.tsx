@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { DashIcon } from './Icons'
 import './PlansPage.css'
 
@@ -10,6 +11,7 @@ const PLANS = [
     destaque: false,
     features: ['Até 5 editais salvos', 'Feed personalizado básico', 'Notificações por e-mail'],
     cta: 'Continuar',
+    action: 'navigate' as const,
   },
   {
     id: 'premium',
@@ -24,11 +26,21 @@ const PLANS = [
       'Painel de acompanhamento',
     ],
     cta: 'Assinar',
+    action: 'select' as const,
   },
 ]
 
 export default function PlansPage() {
+  const navigate = useNavigate()
   const [selected, setSelected] = useState<string | null>(null)
+
+  function handleCta(plan: typeof PLANS[number]) {
+    if (plan.action === 'navigate') {
+      navigate('/dashboard/feed')
+    } else {
+      setSelected(plan.id)
+    }
+  }
 
   return (
     <div className="pdd-plans-page">
@@ -61,7 +73,7 @@ export default function PlansPage() {
             <button
               type="button"
               className={`pdd-plan-cta ${p.destaque ? 'is-primary' : ''}`}
-              onClick={() => setSelected(p.id)}
+              onClick={() => handleCta(p)}
             >
               {p.cta}
             </button>

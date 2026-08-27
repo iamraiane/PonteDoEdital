@@ -1,7 +1,9 @@
 import { useState, useEffect, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import logoNome from '../assets/logo-nome.png'
 import logoPonte from '../assets/logo-ponte.png'
 import { login, getTokenPayload, getUserById } from '../services/user'
+import { sanitizeInput, sanitizeEmail, validateEmail } from '../utils/validation'
 import './LoginFlow.css'
 
 const FEATURES = [
@@ -81,15 +83,8 @@ function Icon({ name }: { name: string }) {
   }
 }
 
-export default function LoginFlow({
-  onSwitchToSignup,
-  onSwitchToRecover,
-  onLoginSuccess,
-}: {
-  onSwitchToSignup?: () => void
-  onSwitchToRecover?: () => void
-  onLoginSuccess?: (userName: string) => void
-} = {}) {
+export default function LoginFlow() {
+  const navigate = useNavigate()
   const [form, setForm] = useState<LoginData>(initialForm)
   const [showPassword, setShowPassword] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -98,15 +93,34 @@ export default function LoginFlow({
   const [errorMessage, setErrorMessage] = useState('')
   const [errorKey, setErrorKey] = useState(0)
   const [touched, setTouched] = useState(false)
+  const [emailError, setEmailError] = useState('')
+  const [senhaError, setSenhaError] = useState('')
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true))
     return () => cancelAnimationFrame(t)
   }, [])
 
-  const emailValid = form.email.includes('@') && form.email.includes('.')
+  const emailValid = validateEmail(form.email) === null
   const senhaValid = form.senha.length >= 8
   const formValid = emailValid && senhaValid
+
+  function handleEmailChange(value: string) {
+    const sanitized = sanitizeEmail(value)
+    setForm((f) => ({ ...f, email: sanitized }))
+    const error = validateEmail(sanitized)
+    setEmailError(error || '')
+  }
+
+  function handleSenhaChange(value: string) {
+    const sanitized = sanitizeInput(value)
+    setForm((f) => ({ ...f, senha: sanitized }))
+  }
+
+  function handleEmailBlur() {
+    const error = validateEmail(form.email)
+    setEmailError(error || '')
+  }
 
   function triggerShake() {
     setShake(true)
@@ -116,6 +130,7 @@ export default function LoginFlow({
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setTouched(true)
+    setEmailError(validateEmail(form.email) || '')
 
     if (!formValid || status === 'loading') {
       triggerShake()
@@ -140,7 +155,7 @@ export default function LoginFlow({
         }
         setStatus('success')
         window.setTimeout(() => {
-          if (onLoginSuccess) onLoginSuccess(nome)
+          navigate('/dashboard/feed')
         }, 1300)
       })
       .catch(() => {
@@ -223,11 +238,13 @@ export default function LoginFlow({
                       type="email"
                       placeholder="Digite seu e-mail"
                       value={form.email}
-                      onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                      onChange={(e) => handleEmailChange(e.target.value)}
+                      onBlur={handleEmailBlur}
                       autoComplete="email"
                     />
                     <span className="pde-input-icon__glyph"><Icon name="mail" /></span>
                   </div>
+                  {touched && emailError && <span className="pde-field-error">{emailError}</span>}
                 </label>
 
                 <label className="pde-field">
@@ -237,7 +254,7 @@ export default function LoginFlow({
                       type={showPassword ? 'text' : 'password'}
                       placeholder="Digite sua senha"
                       value={form.senha}
-                      onChange={(e) => setForm((f) => ({ ...f, senha: e.target.value }))}
+                      onChange={(e) => handleSenhaChange(e.target.value)}
                       autoComplete="current-password"
                     />
                     <button
@@ -255,10 +272,8 @@ export default function LoginFlow({
                   href="#recuperar"
                   className="pde-forgot"
                   onClick={(e) => {
-                    if (onSwitchToRecover) {
-                      e.preventDefault()
-                      onSwitchToRecover()
-                    }
+                    e.preventDefault()
+                    navigate('/recover')
                   }}
                 >
                   Esqueci minha senha
@@ -282,10 +297,8 @@ export default function LoginFlow({
                 <a
                   href="#criar"
                   onClick={(e) => {
-                    if (onSwitchToSignup) {
-                      e.preventDefault()
-                      onSwitchToSignup()
-                    }
+                    e.preventDefault()
+                    navigate('/signup')
                   }}
                 >
                   Criar uma conta <Icon name="arrow" />
