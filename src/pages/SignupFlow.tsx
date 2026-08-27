@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import logoNome from '../assets/logo-nome.png'
 import logoPonte from '../assets/logo-ponte.png'
 import { register } from '../services/user'
-import { sanitizeInput, sanitizeName, sanitizeEmail, validateName, validateEmail, validatePassword, validatePasswordMatch } from '../utils/validation'
+import { sanitizeInput, sanitizeName, sanitizeEmail, validateName, validateEmail, validatePassword } from '../utils/validation'
 import './SignupFlow.css'
 
 const ESTADOS = [

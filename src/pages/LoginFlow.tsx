@@ -2,7 +2,7 @@ import { useState, useEffect, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import logoNome from '../assets/logo-nome.png'
 import logoPonte from '../assets/logo-ponte.png'
-import { login, getTokenPayload, getUserById } from '../services/user'
+import { login } from '../services/user'
 import { sanitizeInput, sanitizeEmail, validateEmail } from '../utils/validation'
 import './LoginFlow.css'
 
@@ -94,7 +94,7 @@ export default function LoginFlow() {
   const [errorKey, setErrorKey] = useState(0)
   const [touched, setTouched] = useState(false)
   const [emailError, setEmailError] = useState('')
-  const [senhaError, setSenhaError] = useState('')
+
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true))
@@ -141,29 +141,23 @@ export default function LoginFlow() {
     setErrorMessage('')
     setShake(false)
 
-    login(form.email, form.senha)
-      .then(async (data) => {
-        localStorage.setItem('token', data.token)
-        localStorage.setItem('loginTime', String(Date.now()))
-        const payload = getTokenPayload()
-        let nome = 'Usuário'
-        if (payload?.id) {
-          try {
-            const user = await getUserById(payload.id)
-            nome = user.name
-          } catch {}
-        }
-        setStatus('success')
-        window.setTimeout(() => {
-          navigate('/dashboard/feed')
-        }, 1300)
-      })
-      .catch(() => {
-        setStatus('error')
-        setErrorMessage('Email ou senha inválidos')
-        setErrorKey((k) => k + 1)
-        triggerShake()
-      })
+  login(form.email, form.senha)
+    .then(async (data) => {
+      localStorage.setItem('token', data.token)
+      localStorage.setItem('loginTime', String(Date.now()))
+
+      setStatus('success')
+
+      window.setTimeout(() => {
+        navigate('/dashboard/feed')
+      }, 1300)
+    })
+    .catch(() => {
+      setStatus('error')
+      setErrorMessage('Email ou senha inválidos')
+      setErrorKey((k) => k + 1)
+      triggerShake()
+    })
   }
 
   return (
