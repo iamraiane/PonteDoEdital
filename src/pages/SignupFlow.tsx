@@ -400,9 +400,7 @@ function StepAccount({
   emailError,
   senhaErrorMsg,
   acceptTerms,
-  acceptPrivacy,
   onAcceptTermsChange,
-  onAcceptPrivacyChange,
 }: {
   form: FormData
   setForm: Dispatch<SetStateAction<FormData>>
@@ -422,8 +420,7 @@ function StepAccount({
   nomeError: string
   emailError: string
   senhaErrorMsg: string
-  acceptTerms: boolean
-  onAcceptTermsChange: (v: boolean) => void
+
 }) {
   const navigate = useNavigate()
   const showConfirmInvalid = confirmarSenhaTouched && form.confirmarSenha.length > 0 && !senhasCoincidem
