@@ -153,6 +153,7 @@ export default function SignupFlow() {
   const [nomeError, setNomeError] = useState('')
   const [emailError, setEmailError] = useState('')
   const [senhaErrorMsg, setSenhaErrorMsg] = useState('')
+  const [acceptTerms, setAcceptTerms] = useState(false)
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true))
@@ -168,7 +169,8 @@ export default function SignupFlow() {
     form.estado !== '' &&
     validateEmail(form.email) === null &&
     senhaValid &&
-    senhasCoincidem
+    senhasCoincidem &&
+    acceptTerms
   const step2Valid = form.interesses.length > 0
 
   function goTo(next: 1 | 2 | 3, dir: 1 | -1) {
@@ -321,6 +323,8 @@ export default function SignupFlow() {
                   nomeError={nomeError}
                   emailError={emailError}
                   senhaErrorMsg={senhaErrorMsg}
+                  acceptTerms={acceptTerms}
+                  onAcceptTermsChange={setAcceptTerms}
                 />
               )}
               {step === 2 && (
@@ -395,6 +399,10 @@ function StepAccount({
   nomeError,
   emailError,
   senhaErrorMsg,
+  acceptTerms,
+  acceptPrivacy,
+  onAcceptTermsChange,
+  onAcceptPrivacyChange,
 }: {
   form: FormData
   setForm: Dispatch<SetStateAction<FormData>>
@@ -414,7 +422,10 @@ function StepAccount({
   nomeError: string
   emailError: string
   senhaErrorMsg: string
+  acceptTerms: boolean
+  onAcceptTermsChange: (v: boolean) => void
 }) {
+  const navigate = useNavigate()
   const showConfirmInvalid = confirmarSenhaTouched && form.confirmarSenha.length > 0 && !senhasCoincidem
 
   return (
@@ -518,6 +529,22 @@ function StepAccount({
         </div>
 
         <PasswordRequirements checks={passwordChecks} touched={senhaTouched} />
+      </div>
+
+      <div className="pde-terms">
+        <label className="pde-terms__item">
+          <input
+            type="checkbox"
+            checked={acceptTerms}
+            onChange={(e) => onAcceptTermsChange(e.target.checked)}
+          />
+          <span>
+            Concordo com os{' '}
+            <a href="/terms" onClick={(e) => { e.preventDefault(); navigate('/terms'); }}>Termos de Uso</a>{' '}
+            e a{' '}
+            <a href="/privacy" onClick={(e) => { e.preventDefault(); navigate('/privacy'); }}>Política de Privacidade</a>
+          </span>
+        </label>
       </div>
 
       <div className="pde-actions pde-actions--center">

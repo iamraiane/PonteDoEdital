@@ -5,6 +5,9 @@ import LoginFlow from './pages/LoginFlow'
 import RecoverFlow from './pages/RecoverFlow'
 import DashboardApp from './pages/dashboard/DashboardApp'
 import AdminApp from './pages/admin/AdminApp'
+import CommercialPage from './pages/CommercialPage'
+import TermsPage from './pages/TermsPage'
+import PrivacyPage from './pages/PrivacyPage'
 import { getTokenPayload, getUserById } from './services/user'
 
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000
@@ -84,6 +87,10 @@ function App() {
         <Route path="/login" element={<LoginFlow />} />
         <Route path="/signup" element={<SignupFlow />} />
         <Route path="/recover" element={<RecoverFlow />} />
+        <Route path="/commercial" element={<CommercialPage />} />
+        <Route index element={<Navigate to="/commercial" replace />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
         <Route
           path="/dashboard/*"
           element={

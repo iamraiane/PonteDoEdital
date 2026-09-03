@@ -579,11 +579,77 @@ html, body {
 .pde-actions {
   display: flex;
   gap: 0.8rem;
-  margin-top: 0.6rem;
+  margin-top: 0.2rem;
 }
 
 .pde-actions--center {
   justify-content: center;
+}
+
+.pde-terms {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.pde-terms__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 13.5px;
+  color: #4a5a6c;
+  line-height: 1.45;
+  user-select: none;
+}
+
+.pde-terms__item input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #b8c4d0;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.pde-terms__item input[type="checkbox"]:checked {
+  background: var(--teal);
+  border-color: var(--teal);
+}
+
+.pde-terms__item input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 5px;
+  height: 10px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.pde-terms__item input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.pde-terms__item a {
+  color: var(--teal);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.pde-terms__item a:hover {
+  color: #189178;
+  text-decoration: underline;
 }
 
 .pde-btn {
