@@ -276,6 +276,13 @@ html, body {
   color: var(--teal);
 }
 
+.pde-field label {
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
 .pde-field input {
   border: 1.5px solid var(--teal-light);
   border-radius: var(--radius);

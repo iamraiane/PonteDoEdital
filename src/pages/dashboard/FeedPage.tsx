@@ -169,6 +169,28 @@ export default function FeedPage({ userName, userId, hasPremium = false, onNavig
             </div>
           </article>
         ))}
+
+        {!loading && !hasPremium && filteredEditais.length > 0 && (
+          <article
+            className="pdd-premium-cta"
+            style={{ animationDelay: `${filteredEditais.length * 80}ms` }}
+          >
+            <span className="pdd-premium-cta__icon">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </span>
+            <h3 className="pdd-premium-cta__title">Mais editais disponíveis</h3>
+            <p className="pdd-premium-cta__text">Assine o Premium para ter acesso a todos os editais e recursos da plataforma.</p>
+            <button
+              type="button"
+              className="pdd-premium-cta__btn"
+              onClick={() => onNavigate?.('plans')}
+            >
+              Assinar Premium
+            </button>
+          </article>
+        )}
       </div>
     </div>
   )

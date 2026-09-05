@@ -225,10 +225,11 @@ export default function LoginFlow() {
                 {status === 'error' && (
                   <p key={errorKey} className="pde-error">{errorMessage}</p>
                 )}
-                <label className="pde-field">
-                  <span>E-mail</span>
+                <div className="pde-field">
+                  <label htmlFor="login-email">E-mail</label>
                   <div className={`pde-input-icon ${touched && !emailValid ? 'is-invalid' : ''}`}>
                     <input
+                      id="login-email"
                       type="email"
                       placeholder="Digite seu e-mail"
                       value={form.email}
@@ -239,12 +240,13 @@ export default function LoginFlow() {
                     <span className="pde-input-icon__glyph"><Icon name="mail" /></span>
                   </div>
                   {touched && emailError && <span className="pde-field-error">{emailError}</span>}
-                </label>
+                </div>
 
-                <label className="pde-field">
-                  <span>Senha</span>
+                <div className="pde-field">
+                  <label htmlFor="login-senha">Senha</label>
                   <div className={`pde-input-icon ${touched && !senhaValid ? 'is-invalid' : ''}`}>
                     <input
+                      id="login-senha"
                       type={showPassword ? 'text' : 'password'}
                       placeholder="Digite sua senha"
                       value={form.senha}
@@ -260,7 +262,7 @@ export default function LoginFlow() {
                       <Icon name={showPassword ? 'eyeOff' : 'eye'} />
                     </button>
                   </div>
-                </label>
+                </div>
 
                 <a
                   href="#recuperar"

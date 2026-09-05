@@ -227,10 +227,11 @@ export default function ResetPasswordPage() {
                     <p className="pde-error-message">{errorMsg}</p>
                   )}
 
-                  <label className="pde-field">
-                    <span>Nova senha</span>
+                  <div className="pde-field">
+                    <label htmlFor="reset-senha">Nova senha</label>
                     <div className={`pde-input-icon ${touched && !senhaValid ? 'is-invalid' : ''}`}>
                       <input
+                        id="reset-senha"
                         type={showPassword ? 'text' : 'password'}
                         placeholder="Digite sua nova senha"
                         value={senha}
@@ -246,7 +247,7 @@ export default function ResetPasswordPage() {
                         <Icon name={showPassword ? 'eyeOff' : 'eye'} />
                       </button>
                     </div>
-                  </label>
+                  </div>
 
                   <div className="pde-actions pde-actions--center">
                     <button

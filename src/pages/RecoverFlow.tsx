@@ -146,10 +146,11 @@ export default function RecoverFlow() {
                     <p className="pde-error-message">{errorMsg}</p>
                   )}
 
-                  <label className="pde-field">
-                    <span>E-mail</span>
+                  <div className="pde-field">
+                    <label htmlFor="recover-email">E-mail</label>
                     <div className={`pde-input-icon ${touched && !emailValid ? 'is-invalid' : ''}`}>
                       <input
+                        id="recover-email"
                         type="email"
                         placeholder="Digite seu e-mail"
                         value={email}
@@ -158,7 +159,7 @@ export default function RecoverFlow() {
                       />
                       <span className="pde-input-icon__glyph"><Icon name="mail" /></span>
                     </div>
-                  </label>
+                  </div>
 
                   <div className="pde-actions pde-actions--center">
                     <button

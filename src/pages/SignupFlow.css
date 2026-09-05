@@ -347,6 +347,13 @@ html, body {
   color: var(--teal);
 }
 
+.pde-field label {
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
 .pde-field--grow {
   flex: 1;
 }

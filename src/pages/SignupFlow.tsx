@@ -481,9 +481,10 @@ function StepAccount({
         <p className="pde-error">As senhas não coincidem</p>
       )}
       <div className="pde-row">
-        <label className="pde-field pde-field--grow">
-          <span>Nome Completo</span>
+        <div className="pde-field pde-field--grow">
+          <label htmlFor="signup-nome">Nome Completo</label>
           <input
+            id="signup-nome"
             type="text"
             placeholder="Digite seu nome"
             value={form.nome}
@@ -491,11 +492,12 @@ function StepAccount({
             autoComplete="name"
           />
           {nomeError && <span className="pde-field-error">{nomeError}</span>}
-        </label>
+        </div>
 
-        <label className="pde-field pde-field--estado">
-          <span>Estado</span>
+        <div className="pde-field pde-field--estado">
+          <label htmlFor="signup-estado">Estado</label>
           <select
+            id="signup-estado"
             value={form.estado}
             onChange={(e) => setForm((f) => ({ ...f, estado: e.target.value }))}
           >
@@ -503,13 +505,14 @@ function StepAccount({
               <option key={uf} value={uf}>{uf}</option>
             ))}
           </select>
-        </label>
+        </div>
       </div>
 
-      <label className="pde-field">
-        <span>E-mail</span>
+      <div className="pde-field">
+        <label htmlFor="signup-email">E-mail</label>
         <div className="pde-input-icon">
           <input
+            id="signup-email"
             type="email"
             placeholder="pontedoedital@gmail.com"
             value={form.email}
@@ -519,13 +522,14 @@ function StepAccount({
           <span className="pde-input-icon__glyph"><Icon name="mail" /></span>
         </div>
         {emailError && <span className="pde-field-error">{emailError}</span>}
-      </label>
+      </div>
 
       <div className="pde-row">
-        <label className="pde-field pde-field--grow">
-          <span>CPF</span>
+        <div className="pde-field pde-field--grow">
+          <label htmlFor="signup-cpf">CPF</label>
           <div className="pde-input-icon">
             <input
+              id="signup-cpf"
               type="text"
               placeholder="000.000.000-00"
               value={form.cpf}
@@ -537,12 +541,13 @@ function StepAccount({
             <span className="pde-input-icon__glyph"><Icon name="id" /></span>
           </div>
           {cpfTouched && cpfError && <span className="pde-field-error">{cpfError}</span>}
-        </label>
+        </div>
 
-        <label className="pde-field pde-field--grow">
-          <span>Data de Nascimento</span>
+        <div className="pde-field pde-field--grow">
+          <label htmlFor="signup-nascimento">Data de Nascimento</label>
           <div className="pde-input-icon">
             <input
+              id="signup-nascimento"
               type="date"
               placeholder="dd/mm/aaaa"
               value={form.dataNascimento}
@@ -551,15 +556,16 @@ function StepAccount({
             />
             <span className="pde-input-icon__glyph"><Icon name="calendar" /></span>
           </div>
-        </label>
+        </div>
       </div>
 
       <div className="pde-password-block">
         <div className="pde-row">
-          <label className="pde-field pde-field--grow">
-            <span>Senha</span>
+          <div className="pde-field pde-field--grow">
+            <label htmlFor="signup-senha">Senha</label>
             <div className="pde-input-icon">
               <input
+                id="signup-senha"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Mínimo 8 caracteres"
                 value={form.senha}
@@ -577,12 +583,13 @@ function StepAccount({
               </button>
             </div>
             {senhaTouched && senhaErrorMsg && <span className="pde-field-error">{senhaErrorMsg}</span>}
-          </label>
+          </div>
 
-          <label className="pde-field pde-field--grow">
-            <span>Confirmar Senha</span>
+          <div className="pde-field pde-field--grow">
+            <label htmlFor="signup-confirmar-senha">Confirmar Senha</label>
             <div className={`pde-input-icon ${showConfirmInvalid ? 'has-error' : ''}`}>
               <input
+                id="signup-confirmar-senha"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Repita a senha"
                 value={form.confirmarSenha}
@@ -599,7 +606,7 @@ function StepAccount({
                 <Icon name={showPassword ? 'eyeOff' : 'eye'} />
               </button>
             </div>
-          </label>
+          </div>
         </div>
 
         <PasswordRequirements checks={passwordChecks} touched={senhaTouched} />
