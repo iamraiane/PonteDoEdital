@@ -40,52 +40,6 @@ html, body {
   overflow: hidden;
 }
 
-@media (max-width: 880px) {
-  /* em telas estreitas o layout deixa de ser "fixed/100vh" e passa a fluir
-     como um documento normal, com o scroll do próprio navegador. Isso evita
-     que elementos (botão, link de login etc.) fiquem presos/cortados fora
-     de containers com scroll aninhado, que nem sempre funcionam bem em
-     todos os navegadores/dispositivos móveis. */
-  .pde-shell {
-    position: static;
-    inset: auto;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: auto;
-    min-height: 100dvh;
-    overflow: visible;
-  }
-
-  /* colapsa o painel institucional numa barra compacta no topo, só com a logo */
-  .pde-side {
-    flex: 0 0 auto;
-    padding: 1rem 1.2rem;
-    overflow: visible;
-  }
-
-  .pde-side__inner {
-    min-height: 0;
-  }
-
-  .pde-side__body,
-  .pde-copyright {
-    display: none;
-  }
-
-  .pde-brand__icon,
-  .pde-brand__logo {
-    height: 2rem;
-  }
-
-  .pde-form-panel {
-    flex: 1 1 auto;
-    padding: 2rem 1.5rem 2.5rem;
-    align-items: flex-start;
-    overflow: visible;
-  }
-}
-
 /* ---------- lado esquerdo (institucional) ---------- */
 
 .pde-side {
@@ -899,6 +853,81 @@ html, body {
 
 /* ---------- responsivo ---------- */
 
+@media (max-width: 880px) {
+  .pde-shell {
+    position: static;
+    inset: auto;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .pde-side {
+    flex: 0 0 auto;
+    padding: 1.2rem 1.2rem 1rem;
+    overflow: visible;
+  }
+
+  .pde-side__inner {
+    min-height: 0;
+  }
+
+  .pde-side__body {
+    display: block;
+    margin-top: 0.8rem;
+  }
+
+  .pde-eyebrow {
+    margin-bottom: 0.6rem;
+  }
+
+  .pde-headline {
+    font-size: clamp(1.3rem, 3vw, 1.7rem);
+    margin-bottom: 0.6rem;
+  }
+
+  .pde-sub {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+  }
+
+  .pde-features {
+    gap: 0.5rem;
+  }
+
+  .pde-features__item {
+    font-size: 0.82rem;
+    gap: 0.5rem;
+  }
+
+  .pde-copyright {
+    display: block;
+    padding-top: 0.8rem;
+    margin-top: auto;
+    font-size: 0.68rem;
+  }
+
+  .pde-brand__icon,
+  .pde-brand__logo {
+    height: 2rem;
+  }
+
+  .pde-form-panel {
+    flex: 1 1 auto;
+    padding: 1.5rem 1.5rem 2rem;
+    align-items: flex-start;
+    overflow: visible;
+  }
+
+  .pde-form-panel__inner {
+    margin: 0 auto;
+  }
+}
+
 @media (max-width: 560px) {
   .pde-row {
     flex-direction: column;
@@ -915,20 +944,53 @@ html, body {
 
 @media (max-width: 480px) {
   .pde-side {
-    padding: 1rem 1.2rem;
+    padding: 1.5rem 1.2rem 1.2rem;
   }
 
   .pde-brand__icon,
   .pde-brand__logo {
-    height: 2rem;
+    height: 2.2rem;
+  }
+
+  .pde-side__body {
+    margin-top: 1.2rem;
+  }
+
+  .pde-headline {
+    font-size: clamp(1.3rem, 5vw, 1.6rem);
+  }
+
+  .pde-sub {
+    font-size: 0.88rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .pde-features__item {
+    font-size: 0.85rem;
   }
 
   .pde-form-panel {
-    padding: 1.2rem 0.8rem 1rem;
+    padding: 1.5rem 1rem 1.5rem;
+  }
+
+  .pde-form-header {
+    margin-bottom: 0.8rem;
+  }
+
+  .pde-form-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .pde-form-header p {
+    font-size: 0.85rem;
   }
 
   .pde-stage {
     min-height: auto;
+  }
+
+  .pde-fields {
+    gap: 0.8rem;
   }
 
   .pde-actions--center .pde-btn--primary {
@@ -944,79 +1006,116 @@ html, body {
     grid-template-columns: 1fr;
     gap: 0.3rem;
   }
+
+  .pde-login-hint {
+    font-size: 0.78rem;
+    margin-top: 1rem;
+  }
 }
 
 /* ---------- responsivo: Xiaomi, Pocophone, iPhone SE ---------- */
 
 @media (max-width: 390px) {
   .pde-side {
-    padding: 0.85rem 1rem;
+    padding: 1.2rem 1rem 1rem;
   }
 
   .pde-brand__icon,
   .pde-brand__logo {
-    height: 1.8rem;
+    height: 2rem;
+  }
+
+  .pde-side__body {
+    margin-top: 1rem;
+  }
+
+  .pde-eyebrow {
+    font-size: 0.72rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .pde-headline {
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .pde-sub {
+    font-size: 0.82rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .pde-features__item {
+    font-size: 0.8rem;
+    gap: 0.5rem;
+  }
+
+  .pde-copyright {
+    font-size: 0.68rem;
   }
 
   .pde-form-panel {
-    padding: 2rem 1.5rem 1.5rem;
+    padding: 1.2rem 1rem 1.5rem;
   }
 
   .pde-form-header {
-    margin-bottom: 1rem;
+    margin-bottom: 0.6rem;
   }
 
   .pde-form-header h2 {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
 
   .pde-form-header p {
-    font-size: 0.85rem;
-  }
-
-  .pde-stepper {
-    margin-bottom: 1rem;
-  }
-
-  .pde-stepper__dot {
-    width: 32px;
-    height: 32px;
     font-size: 0.8rem;
   }
 
+  .pde-stepper {
+    margin-bottom: 0.6rem;
+  }
+
+  .pde-stepper__dot {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+
   .pde-fields {
-    gap: 0.75rem;
+    gap: 0.65rem;
   }
 
   .pde-field {
-    font-size: 0.78rem;
+    font-size: 0.74rem;
   }
 
   .pde-field input,
   .pde-field select {
-    padding: 0.6rem 0.7rem;
-    font-size: 0.85rem;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.8rem;
   }
 
   .pde-btn {
-    padding: 0.65rem 1rem;
-    font-size: 0.85rem;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.8rem;
   }
 
   .pde-tag {
-    padding: 0.6rem 0.35rem;
-    font-size: 0.78rem;
+    padding: 0.5rem 0.3rem;
+    font-size: 0.74rem;
   }
 
   .pde-login-hint {
-    font-size: 0.78rem;
-    margin-top: 1rem;
+    font-size: 0.74rem;
+    margin-top: 0.8rem;
   }
 
   .pde-error {
-    font-size: 0.8rem;
-    padding: 0.5rem 0.7rem;
-    margin-bottom: 0.3rem;
+    font-size: 0.76rem;
+    padding: 0.4rem 0.6rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .pde-terms__item {
+    font-size: 10.5px;
   }
 }
 
