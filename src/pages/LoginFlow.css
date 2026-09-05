@@ -79,13 +79,17 @@ html, body {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  width: 100%;
+  min-width: 0;
 }
 
 .pde-brand__icon {
   height: 4rem;
   width: auto;
+  max-width: 100%;
   display: block;
   object-fit: contain;
+  flex-shrink: 0;
   animation: pde-sway 6s ease-in-out infinite;
   transform-origin: 50% 85%;
 }
@@ -98,6 +102,8 @@ html, body {
 .pde-brand__logo {
   height: 4rem;
   width: auto;
+  max-width: 100%;
+  min-width: 0;
   display: block;
   object-fit: contain;
   object-position: left center;
