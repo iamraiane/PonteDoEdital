@@ -500,6 +500,19 @@ html, body {
   to { transform: rotate(360deg); }
 }
 
+/* ---------- mensagens de erro ---------- */
+
+.pde-error-message {
+  background: #fde8e8;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  padding: 0.7rem 1rem;
+  font-size: 0.85rem;
+  margin: 0;
+  text-align: center;
+}
+
 /* ---------- rodapé ---------- */
 
 .pde-login-hint {

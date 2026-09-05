@@ -3,9 +3,8 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import logoNome from '../assets/logo-nome.png'
 import logoPonte from '../assets/logo-ponte.png'
+import { forgotPassword } from '../services/user'
 import './RecoverFlow.css'
-
-type Step = 'email' | 'reset' | 'done'
 
 function Icon({ name }: { name: string }) {
   switch (name) {
@@ -22,21 +21,6 @@ function Icon({ name }: { name: string }) {
           <path d="m4 6.5 8 6 8-6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       )
-    case 'eye':
-      return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" strokeLinejoin="round" />
-          <circle cx="12" cy="12" r="2.7" />
-        </svg>
-      )
-    case 'eyeOff':
-      return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <path d="M3 3l18 18" strokeLinecap="round" />
-          <path d="M10.6 5.7A10.6 10.6 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a15 15 0 0 1-3.2 3.9M6.6 6.9C4 8.7 2.5 12 2.5 12S6 18.5 12 18.5c1.2 0 2.3-.2 3.3-.6" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M9.9 10c-.3.5-.4 1-.4 1.6 0 1.5 1.2 2.7 2.7 2.7.6 0 1.1-.2 1.6-.5" strokeLinecap="round" />
-        </svg>
-      )
     case 'arrow':
       return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -51,11 +35,9 @@ function Icon({ name }: { name: string }) {
 export default function RecoverFlow() {
   const navigate = useNavigate()
   const [mounted, setMounted] = useState(false)
-  const [step, setStep] = useState<Step>('email')
   const [email, setEmail] = useState('')
-  const [senha, setSenha] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [status, setStatus] = useState<'idle' | 'loading'>('idle')
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [errorMsg, setErrorMsg] = useState('')
   const [touched, setTouched] = useState(false)
   const [shake, setShake] = useState(false)
 
@@ -65,14 +47,13 @@ export default function RecoverFlow() {
   }, [])
 
   const emailValid = email.includes('@') && email.includes('.')
-  const senhaValid = senha.length >= 8
 
   function triggerShake() {
     setShake(true)
     window.setTimeout(() => setShake(false), 420)
   }
 
-  function handleSendEmail(e: FormEvent) {
+  async function handleSendEmail(e: FormEvent) {
     e.preventDefault()
     setTouched(true)
     if (!emailValid) {
@@ -80,25 +61,14 @@ export default function RecoverFlow() {
       return
     }
     setStatus('loading')
-    window.setTimeout(() => {
-      setStatus('idle')
-      setTouched(false)
-      setStep('reset')
-    }, 1000)
-  }
-
-  function handleResetPassword(e: FormEvent) {
-    e.preventDefault()
-    setTouched(true)
-    if (!senhaValid) {
-      triggerShake()
-      return
+    setErrorMsg('')
+    try {
+      await forgotPassword(email)
+      setStatus('success')
+    } catch {
+      setErrorMsg('Erro ao enviar e-mail. Tente novamente.')
+      setStatus('error')
     }
-    setStatus('loading')
-    window.setTimeout(() => {
-      setStatus('idle')
-      setStep('done')
-    }, 1000)
   }
 
   return (
@@ -139,7 +109,30 @@ export default function RecoverFlow() {
           </header>
 
           <div className={`pde-stage ${shake ? 'pde-stage--shake' : ''}`}>
-            {step === 'email' && (
+            {status === 'success' ? (
+              <div key="done" className="pde-panel pde-panel--enter-right">
+                <div className="pde-login-success">
+                  <span className="pde-login-success__ring">
+                    <Icon name="check" />
+                  </span>
+                  <p className="pde-done__title">
+                    E-mail <span>enviado!</span>
+                  </p>
+                  <p className="pde-login-success__sub">
+                    Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha.
+                  </p>
+                  <div className="pde-actions pde-actions--center">
+                    <button
+                      type="button"
+                      className="pde-btn pde-btn--primary"
+                      onClick={() => navigate('/login')}
+                    >
+                      Voltar ao login <Icon name="arrow" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
               <div key="email" className="pde-panel pde-panel--enter-right">
                 <form className="pde-fields" onSubmit={handleSendEmail} noValidate>
                   <div className="pde-step-heading">
@@ -148,6 +141,10 @@ export default function RecoverFlow() {
                       Digite seu e-mail cadastrado. Enviaremos a liberação para redefinir a senha
                     </p>
                   </div>
+
+                  {errorMsg && (
+                    <p className="pde-error-message">{errorMsg}</p>
+                  )}
 
                   <label className="pde-field">
                     <span>E-mail</span>
@@ -188,77 +185,6 @@ export default function RecoverFlow() {
                     Entrar na plataforma <Icon name="arrow" />
                   </a>
                 </p>
-              </div>
-            )}
-
-            {step === 'reset' && (
-              <div key="reset" className="pde-panel pde-panel--enter-right">
-                <form className="pde-fields" onSubmit={handleResetPassword} noValidate>
-                  <div className="pde-step-heading">
-                    <p className="pde-step-title">Redefina sua senha</p>
-                    <p className="pde-step-sub">
-                      Digite sua nova senha para ter acesso à plataforma novamente
-                    </p>
-                  </div>
-
-                  <label className="pde-field">
-                    <span>Senha</span>
-                    <div className={`pde-input-icon ${touched && !senhaValid ? 'is-invalid' : ''}`}>
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        placeholder="Digite sua senha"
-                        value={senha}
-                        onChange={(ev) => setSenha(ev.target.value)}
-                        autoComplete="new-password"
-                      />
-                      <button
-                        type="button"
-                        className="pde-input-icon__glyph pde-input-icon__glyph--btn"
-                        onClick={() => setShowPassword(!showPassword)}
-                        aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                      >
-                        <Icon name={showPassword ? 'eyeOff' : 'eye'} />
-                      </button>
-                    </div>
-                  </label>
-
-                  <div className="pde-actions pde-actions--center">
-                    <button
-                      type="submit"
-                      className={`pde-btn pde-btn--primary ${status === 'loading' ? 'is-loading' : ''}`}
-                      disabled={status === 'loading'}
-                    >
-                      <span className="pde-btn__label">Redefinir</span>
-                      <Icon name="arrow" />
-                      <span className="pde-btn__spinner" aria-hidden="true" />
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
-
-            {step === 'done' && (
-              <div key="done" className="pde-panel pde-panel--enter-right">
-                <div className="pde-login-success">
-                  <span className="pde-login-success__ring">
-                    <Icon name="check" />
-                  </span>
-                  <p className="pde-done__title">
-                    Senha <span>redefinida!</span>
-                  </p>
-                  <p className="pde-login-success__sub">
-                    Sua senha foi alterada com sucesso. Você já pode entrar na plataforma.
-                  </p>
-                  <div className="pde-actions pde-actions--center">
-                    <button
-                      type="button"
-                      className="pde-btn pde-btn--primary"
-                      onClick={() => navigate('/login')}
-                    >
-                      Entrar na plataforma <Icon name="arrow" />
-                    </button>
-                  </div>
-                </div>
               </div>
             )}
           </div>

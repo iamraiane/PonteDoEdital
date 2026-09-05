@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import logoNome from '../assets/logo-nome.png'
 import logoPonte from '../assets/logo-ponte.png'
 import { register } from '../services/user'
-import { sanitizeInput, sanitizeName, sanitizeEmail, validateName, validateEmail, validatePassword } from '../utils/validation'
+import { sanitizeInput, sanitizeName, sanitizeEmail, validateName, validateEmail, validatePassword, sanitizeCpf, formatCpf, validateCpf } from '../utils/validation'
 import './SignupFlow.css'
 
 const ESTADOS = [
@@ -26,6 +26,8 @@ const FEATURES = [
 type FormData = {
   nome: string
   estado: string
+  cpf: string
+  dataNascimento: string
   email: string
   senha: string
   confirmarSenha: string
@@ -35,6 +37,8 @@ type FormData = {
 const initialForm: FormData = {
   nome: '',
   estado: 'SP',
+  cpf: '',
+  dataNascimento: '',
   email: '',
   senha: '',
   confirmarSenha: '',
@@ -127,6 +131,23 @@ function Icon({ name }: { name: string }) {
           <path d="M5 12.5l4.5 4.5L19 7" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       )
+    case 'id':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <rect x="2" y="4" width="20" height="16" rx="2.5" />
+          <circle cx="8" cy="10.5" r="2.5" />
+          <path d="M4 18c0-2 1.8-3 4-3s4 1 4 3" strokeLinecap="round" />
+          <path d="M14 9.5h6M14 13h4" strokeLinecap="round" />
+        </svg>
+      )
+    case 'calendar':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <rect x="3" y="4.5" width="18" height="17" rx="2.5" />
+          <path d="M3 9.5h18" strokeLinecap="round" />
+          <path d="M8 2.5v4M16 2.5v4" strokeLinecap="round" />
+        </svg>
+      )
     case 'dot':
       return (
         <svg viewBox="0 0 24 24" fill="currentColor">
@@ -154,6 +175,8 @@ export default function SignupFlow() {
   const [emailError, setEmailError] = useState('')
   const [senhaErrorMsg, setSenhaErrorMsg] = useState('')
   const [acceptTerms, setAcceptTerms] = useState(false)
+  const [cpfError, setCpfError] = useState('')
+  const [cpfTouched, setCpfTouched] = useState(false)
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true))
@@ -167,6 +190,7 @@ export default function SignupFlow() {
   const step1Valid =
     validateName(form.nome) === null &&
     form.estado !== '' &&
+    validateCpf(form.cpf) === null &&
     validateEmail(form.email) === null &&
     senhaValid &&
     senhasCoincidem &&
@@ -181,6 +205,7 @@ export default function SignupFlow() {
   function handleContinueStep1() {
     if (!step1Valid) {
       setNomeError(validateName(form.nome) || '')
+      setCpfError(validateCpf(form.cpf) || '')
       setEmailError(validateEmail(form.email) || '')
       setSenhaTouched(true)
       setConfirmarSenhaTouched(true)
@@ -208,6 +233,12 @@ export default function SignupFlow() {
     const sanitized = sanitizeEmail(value)
     setForm((f) => ({ ...f, email: sanitized }))
     setEmailError(validateEmail(sanitized) || '')
+  }
+
+  function handleCpfChange(value: string) {
+    const formatted = formatCpf(value)
+    setForm((f) => ({ ...f, cpf: formatted }))
+    setCpfError(validateCpf(formatted) || '')
   }
 
   function handleSenhaChange(value: string) {
@@ -240,7 +271,7 @@ export default function SignupFlow() {
     setStatus('loading')
     setErrorMessage('')
 
-    register(form.nome, form.email, form.senha)
+    register(form.nome, form.email, form.senha, sanitizeCpf(form.cpf), form.dataNascimento)
       .then(() => {
         navigate('/login')
       })
@@ -320,6 +351,10 @@ export default function SignupFlow() {
                   onEmailChange={handleEmailChange}
                   onSenhaChange={handleSenhaChange}
                   onConfirmarSenhaChange={handleConfirmarSenhaChange}
+                  onCpfChange={handleCpfChange}
+                  cpfError={cpfError}
+                  cpfTouched={cpfTouched}
+                  onCpfTouched={() => setCpfTouched(true)}
                   nomeError={nomeError}
                   emailError={emailError}
                   senhaErrorMsg={senhaErrorMsg}
@@ -396,6 +431,10 @@ function StepAccount({
   onEmailChange,
   onSenhaChange,
   onConfirmarSenhaChange,
+  onCpfChange,
+  cpfError,
+  cpfTouched,
+  onCpfTouched,
   nomeError,
   emailError,
   senhaErrorMsg,
@@ -417,6 +456,10 @@ function StepAccount({
   onEmailChange: (value: string) => void
   onSenhaChange: (value: string) => void
   onConfirmarSenhaChange: (value: string) => void
+  onCpfChange: (value: string) => void
+  cpfError: string
+  cpfTouched: boolean
+  onCpfTouched: () => void
   nomeError: string
   emailError: string
   senhaErrorMsg: string
@@ -477,6 +520,39 @@ function StepAccount({
         </div>
         {emailError && <span className="pde-field-error">{emailError}</span>}
       </label>
+
+      <div className="pde-row">
+        <label className="pde-field pde-field--grow">
+          <span>CPF</span>
+          <div className="pde-input-icon">
+            <input
+              type="text"
+              placeholder="000.000.000-00"
+              value={form.cpf}
+              onChange={(e) => onCpfChange(e.target.value)}
+              onBlur={onCpfTouched}
+              maxLength={14}
+              autoComplete="off"
+            />
+            <span className="pde-input-icon__glyph"><Icon name="id" /></span>
+          </div>
+          {cpfTouched && cpfError && <span className="pde-field-error">{cpfError}</span>}
+        </label>
+
+        <label className="pde-field pde-field--grow">
+          <span>Data de Nascimento</span>
+          <div className="pde-input-icon">
+            <input
+              type="date"
+              placeholder="dd/mm/aaaa"
+              value={form.dataNascimento}
+              onChange={(e) => setForm((f) => ({ ...f, dataNascimento: e.target.value }))}
+              autoComplete="bday"
+            />
+            <span className="pde-input-icon__glyph"><Icon name="calendar" /></span>
+          </div>
+        </label>
+      </div>
 
       <div className="pde-password-block">
         <div className="pde-row">

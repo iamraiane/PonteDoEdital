@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import SignupFlow from './pages/SignupFlow'
 import LoginFlow from './pages/LoginFlow'
 import RecoverFlow from './pages/RecoverFlow'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 import DashboardApp from './pages/dashboard/DashboardApp'
 import AdminApp from './pages/admin/AdminApp'
 import CommercialPage from './pages/CommercialPage'
@@ -87,6 +88,7 @@ function App() {
         <Route path="/login" element={<LoginFlow />} />
         <Route path="/signup" element={<SignupFlow />} />
         <Route path="/recover" element={<RecoverFlow />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/commercial" element={<CommercialPage />} />
         <Route index element={<Navigate to="/commercial" replace />} />
         <Route path="/terms" element={<TermsPage />} />

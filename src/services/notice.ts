@@ -25,6 +25,6 @@ async function authRequest<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>
 }
 
-export async function getNotices(): Promise<NoticeApi[]> {
-  return authRequest<NoticeApi[]>('notices')
+export async function getNotices(userId: number): Promise<NoticeApi[]> {
+  return authRequest<NoticeApi[]>(`notices/user/${userId}`)
 }

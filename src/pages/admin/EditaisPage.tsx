@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { DashIcon } from '../dashboard/Icons'
 import { getNotices, type NoticeApi } from '../../services/notice'
+import { getTokenPayload } from '../../services/user'
 import './EditaisPage.css'
 
 type Edital = {
@@ -38,8 +39,10 @@ export default function EditaisPage() {
   const [busca, setBusca] = useState('')
 
   useEffect(() => {
+    const payload = getTokenPayload()
+    if (!payload?.id) return
     setLoading(true)
-    getNotices()
+    getNotices(payload.id)
       .then((data) => setEditais(data.map(mapNoticeToEdital)))
       .catch(() => setError('Erro ao carregar editais'))
       .finally(() => setLoading(false))

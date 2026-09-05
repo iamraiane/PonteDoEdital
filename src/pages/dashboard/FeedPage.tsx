@@ -63,7 +63,7 @@ function mapNoticeToEdital(n: NoticeApi): Edital {
   }
 }
 
-export default function FeedPage({ userName, hasPremium = false, onNavigate }: { userName: string; hasPremium?: boolean; onNavigate?: (page: string) => void }) {
+export default function FeedPage({ userName, userId, hasPremium = false, onNavigate }: { userName: string; userId?: number; hasPremium?: boolean; onNavigate?: (page: string) => void }) {
   const [estado, setEstado] = useState('Todos')
   const [salvos, setSalvos] = useState<Record<string, boolean>>({})
   const [agendados, setAgendados] = useState<Record<string, boolean>>({})
@@ -72,12 +72,13 @@ export default function FeedPage({ userName, hasPremium = false, onNavigate }: {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!userId) return
     setLoading(true)
-    getNotices()
+    getNotices(userId)
       .then((data) => setEditais(data.map(mapNoticeToEdital)))
       .catch(() => setError('Erro ao carregar editais'))
       .finally(() => setLoading(false))
-  }, [])
+  }, [userId])
 
   function toggleSalvo(id: string) {
     setSalvos((s) => ({ ...s, [id]: !s[id] }))

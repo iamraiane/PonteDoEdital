@@ -65,3 +65,40 @@ export function validatePasswordMatch(senha: string, confirmar: string): string 
   if (senha !== confirmar) return 'As senhas não coincidem'
   return null
 }
+
+export function sanitizeCpf(value: string): string {
+  return value.replace(/[^\d]/g, '').slice(0, 11)
+}
+
+export function formatCpf(value: string): string {
+  const digits = sanitizeCpf(value)
+  if (digits.length <= 3) return digits
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`
+}
+
+export function validateCpf(cpf: string): string | null {
+  const digits = sanitizeCpf(cpf)
+  if (digits.length === 0) return 'CPF é obrigatório'
+  if (digits.length !== 11) return 'CPF deve ter 11 dígitos'
+  if (/^(\d)\1{10}$/.test(digits)) return 'CPF inválido'
+
+  let soma = 0
+  for (let i = 0; i < 9; i++) {
+    soma += parseInt(digits.charAt(i)) * (10 - i)
+  }
+  let resto = (soma * 10) % 11
+  if (resto === 10) resto = 0
+  if (resto !== parseInt(digits.charAt(9))) return 'CPF inválido'
+
+  soma = 0
+  for (let i = 0; i < 10; i++) {
+    soma += parseInt(digits.charAt(i)) * (11 - i)
+  }
+  resto = (soma * 10) % 11
+  if (resto === 10) resto = 0
+  if (resto !== parseInt(digits.charAt(10))) return 'CPF inválido'
+
+  return null
+}
