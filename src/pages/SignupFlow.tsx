@@ -212,7 +212,29 @@ export default function SignupFlow() {
       triggerShake()
       return
     }
-    goTo(2, 1)
+
+    if (status === 'loading') return
+    setStatus('loading')
+    setEmailError('')
+    setCpfError('')
+
+    register(form.nome, form.email, form.senha, sanitizeCpf(form.cpf), form.dataNascimento)
+      .then(() => {
+        setStatus('idle')
+        goTo(2, 1)
+      })
+      .catch((err) => {
+        setStatus('idle')
+        const msg = err.message || 'Erro ao criar conta'
+        if (msg.toLowerCase().includes('email')) {
+          setEmailError(msg)
+        } else if (msg.toLowerCase().includes('cpf')) {
+          setCpfError(msg)
+        } else {
+          setErrorMessage(msg)
+        }
+        triggerShake()
+      })
   }
 
   function handleContinueStep2() {
@@ -267,19 +289,7 @@ export default function SignupFlow() {
   }
 
   function handleFinish() {
-    if (status === 'loading') return
-    setStatus('loading')
-    setErrorMessage('')
-
-    register(form.nome, form.email, form.senha, sanitizeCpf(form.cpf), form.dataNascimento)
-      .then(() => {
-        navigate('/login')
-      })
-      .catch((err) => {
-        setStatus('error')
-        setErrorMessage(err.message || 'Erro ao criar conta')
-        triggerShake()
-      })
+    navigate('/login')
   }
 
   return (
