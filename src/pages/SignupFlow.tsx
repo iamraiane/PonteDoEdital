@@ -177,11 +177,17 @@ export default function SignupFlow() {
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [cpfError, setCpfError] = useState('')
   const [cpfTouched, setCpfTouched] = useState(false)
+  const [termsError, setTermsError] = useState('')
+  const [dataNascimentoError, setDataNascimentoError] = useState('')
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true))
     return () => cancelAnimationFrame(t)
   }, [])
+
+  useEffect(() => {
+    if (form.dataNascimento.length > 0) setDataNascimentoError('')
+  }, [form.dataNascimento])
 
   const passwordChecks = getPasswordChecks(form.senha)
   const senhaValid = isPasswordValid(passwordChecks)
@@ -192,6 +198,7 @@ export default function SignupFlow() {
     form.estado !== '' &&
     validateCpf(form.cpf) === null &&
     validateEmail(form.email) === null &&
+    form.dataNascimento.trim().length > 0 &&
     senhaValid &&
     senhasCoincidem &&
     acceptTerms
@@ -207,8 +214,11 @@ export default function SignupFlow() {
       setNomeError(validateName(form.nome) || '')
       setCpfError(validateCpf(form.cpf) || '')
       setEmailError(validateEmail(form.email) || '')
+      setDataNascimentoError(form.dataNascimento.trim().length > 0 ? '' : 'Data de Nascimento é obrigatória')
       setSenhaTouched(true)
       setConfirmarSenhaTouched(true)
+      setCpfTouched(true)
+      setTermsError(acceptTerms ? '' : 'Você precisa aceitar os Termos de Uso e a Política de Privacidade.')
       triggerShake()
       return
     }
@@ -332,12 +342,14 @@ export default function SignupFlow() {
 
       <main className="pde-form-panel">
         <div className="pde-form-panel__inner">
-          <header className="pde-form-header">
-            <h2>Vamos criar sua conta</h2>
-            <p><span>no Ponte do Edital</span></p>
-          </header>
+          <div className="pde-form-sticky">
+            <header className="pde-form-header">
+              <h2>Vamos criar sua conta</h2>
+              <p><span>no Ponte do Edital</span></p>
+            </header>
 
-          <Stepper step={step} />
+            <Stepper step={step} />
+          </div>
 
           <div className={`pde-stage ${shake ? 'pde-stage--shake' : ''}`}>
             <div
@@ -370,6 +382,9 @@ export default function SignupFlow() {
                   senhaErrorMsg={senhaErrorMsg}
                   acceptTerms={acceptTerms}
                   onAcceptTermsChange={setAcceptTerms}
+                  termsError={termsError}
+                  setTermsError={setTermsError}
+                  dataNascimentoError={dataNascimentoError}
                 />
               )}
               {step === 2 && (
@@ -450,6 +465,9 @@ function StepAccount({
   senhaErrorMsg,
   acceptTerms,
   onAcceptTermsChange,
+  termsError,
+  setTermsError,
+  dataNascimentoError,
 }: {
   form: FormData
   setForm: Dispatch<SetStateAction<FormData>>
@@ -475,6 +493,9 @@ function StepAccount({
   senhaErrorMsg: string
   acceptTerms: boolean
   onAcceptTermsChange: (v: boolean) => void
+  termsError: string
+  setTermsError: (v: string) => void
+  dataNascimentoError: string
 }) {
   const navigate = useNavigate()
   const showConfirmInvalid = confirmarSenhaTouched && form.confirmarSenha.length > 0 && !senhasCoincidem
@@ -561,11 +582,14 @@ function StepAccount({
               type="date"
               placeholder="dd/mm/aaaa"
               value={form.dataNascimento}
-              onChange={(e) => setForm((f) => ({ ...f, dataNascimento: e.target.value }))}
+              onChange={(e) => {
+                setForm((f) => ({ ...f, dataNascimento: e.target.value }))
+              }}
               autoComplete="bday"
             />
             <span className="pde-input-icon__glyph"><Icon name="calendar" /></span>
           </div>
+          {dataNascimentoError && <span className="pde-field-error">{dataNascimentoError}</span>}
         </div>
       </div>
 
@@ -627,7 +651,10 @@ function StepAccount({
           <input
             type="checkbox"
             checked={acceptTerms}
-            onChange={(e) => onAcceptTermsChange(e.target.checked)}
+            onChange={(e) => {
+              onAcceptTermsChange(e.target.checked)
+              if (e.target.checked) setTermsError('')
+            }}
           />
           <span>
             Concordo com os{' '}
@@ -636,6 +663,7 @@ function StepAccount({
             <a href="/privacy" onClick={(e) => { e.preventDefault(); navigate('/privacy'); }}>Política de Privacidade</a>
           </span>
         </label>
+        {termsError && <span className="pde-field-error">{termsError}</span>}
       </div>
 
       <div className="pde-actions pde-actions--center">
