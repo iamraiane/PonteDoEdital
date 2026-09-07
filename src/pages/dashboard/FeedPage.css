@@ -502,3 +502,112 @@
     padding: 0.6rem 1.5rem;
   }
 }
+
+/* ---------- modal limite de favoritos ---------- */
+
+.pdd-limit-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 27, 48, 0.55);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.pdd-limit-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.pdd-limit-modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem 2rem 1.8rem;
+  width: 100%;
+  max-width: 24rem;
+  text-align: center;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.35);
+  transform: scale(0.92) translateY(14px);
+  transition: transform 0.28s cubic-bezier(0.2, 0.9, 0.25, 1.1), opacity 0.28s ease;
+  opacity: 0;
+}
+
+.pdd-limit-modal.is-open {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+.pdd-limit-modal__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #fef3cd;
+  color: #d4a017;
+  margin-bottom: 1rem;
+}
+
+.pdd-limit-modal__icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.pdd-limit-modal__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 0.6rem;
+  color: var(--ink, #16293a);
+}
+
+.pdd-limit-modal__text {
+  font-size: 0.88rem;
+  color: #63788a;
+  line-height: 1.5;
+  margin: 0 0 1.4rem;
+}
+
+.pdd-limit-modal__actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+.pdd-limit-modal__btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.4rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.pdd-limit-modal__btn:active {
+  transform: scale(0.97);
+}
+
+.pdd-limit-modal__btn--secondary {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.pdd-limit-modal__btn--secondary:hover {
+  background: #dee2e6;
+}
+
+.pdd-limit-modal__btn--primary {
+  background: var(--teal, #0f9b8e);
+  color: #fff;
+}
+
+.pdd-limit-modal__btn--primary:hover {
+  background: #0d8a7e;
+}

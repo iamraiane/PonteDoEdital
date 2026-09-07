@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { DashIcon, DashAvatar } from './Icons'
 import './FeedPage.css'
 import { getNotices, type NoticeApi } from '../../services/notice'
+import { getFavorites, addFavorite, removeFavorite } from '../../services/favorite'
 
 const ESTADOS = [
   'Todos', 'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
@@ -70,18 +72,42 @@ export default function FeedPage({ userName, userId, hasPremium = false, onNavig
   const [editais, setEditais] = useState<Edital[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [favoriteError, setFavoriteError] = useState<string | null>(null)
+  const [showLimitModal, setShowLimitModal] = useState(false)
 
   useEffect(() => {
     if (!userId) return
     setLoading(true)
-    getNotices(userId)
-      .then((data) => setEditais(data.map(mapNoticeToEdital)))
+    Promise.all([
+      getNotices(userId),
+      getFavorites().catch(() => []),
+    ])
+      .then(([notices, favorites]) => {
+        setEditais(notices.map(mapNoticeToEdital))
+        const savedMap: Record<string, boolean> = {}
+        favorites.forEach((f) => { savedMap[String(f.notice_id)] = true })
+        setSalvos(savedMap)
+      })
       .catch(() => setError('Erro ao carregar editais'))
       .finally(() => setLoading(false))
   }, [userId])
 
   function toggleSalvo(id: string) {
-    setSalvos((s) => ({ ...s, [id]: !s[id] }))
+    const noticeId = parseInt(id)
+    const isSaved = salvos[id]
+
+    setSalvos((s) => ({ ...s, [id]: !isSaved }))
+    setFavoriteError(null)
+
+    const action = isSaved ? removeFavorite(noticeId) : addFavorite(noticeId)
+    action.catch((err) => {
+      setSalvos((s) => ({ ...s, [id]: isSaved }))
+      if (err.message.includes('limit') || err.message.includes('5')) {
+        setShowLimitModal(true)
+      } else {
+        setFavoriteError(err.message || 'Erro ao salvar edital')
+      }
+    })
   }
 
   function agendar(id: string) {
@@ -112,6 +138,9 @@ export default function FeedPage({ userName, userId, hasPremium = false, onNavig
 
       {loading && <p>Carregando editais...</p>}
       {error && <p style={{ color: 'red' }}>{error}</p>}
+      {favoriteError && (
+        <p style={{ color: 'red', marginBottom: '0.5rem' }}>{favoriteError}</p>
+      )}
 
       <div className="pdd-edital-list">
         {!loading && filteredEditais.length === 0 && <p>Nenhum edital encontrado.</p>}
@@ -192,6 +221,47 @@ export default function FeedPage({ userName, userId, hasPremium = false, onNavig
           </article>
         )}
       </div>
+
+      {createPortal(
+        <div className={`pdd-limit-overlay ${showLimitModal ? 'is-open' : ''}`} onClick={() => setShowLimitModal(false)}>
+          <div
+            className={`pdd-limit-modal ${showLimitModal ? 'is-open' : ''}`}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Limite de favoritos"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="pdd-limit-modal__icon">
+              <DashIcon name="bookmark-filled" />
+            </span>
+            <h2 className="pdd-limit-modal__title">Limite atingido</h2>
+            <p className="pdd-limit-modal__text">
+              Você atingiu o limite de 5 editais salvos.<br />
+              Assine o Premium para salvar quantos editais quiser.
+            </p>
+            <div className="pdd-limit-modal__actions">
+              <button
+                type="button"
+                className="pdd-limit-modal__btn pdd-limit-modal__btn--secondary"
+                onClick={() => setShowLimitModal(false)}
+              >
+                Entendi
+              </button>
+              <button
+                type="button"
+                className="pdd-limit-modal__btn pdd-limit-modal__btn--primary"
+                onClick={() => {
+                  setShowLimitModal(false)
+                  onNavigate?.('plans')
+                }}
+              >
+                Assinar Premium
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
     </div>
   )
 }
