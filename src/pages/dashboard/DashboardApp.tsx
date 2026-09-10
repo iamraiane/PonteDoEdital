@@ -8,7 +8,6 @@ import PlansPage from './PlansPage'
 import FaqPage from './FaqPage'
 import AboutPage from './AboutPage'
 import ProfilePage, { type ProfileData } from './ProfilePage'
-import { getUserSubscription } from '../../services/user'
 
 const ROUTE_MAP: Record<string, PageKey> = {
   feed: 'feed',
@@ -33,11 +32,13 @@ const KEY_TO_ROUTE: Record<PageKey, string> = {
 export default function DashboardApp({
   userName = 'Raiane',
   userId,
+  userRole,
   onLogout,
   onOpenAdmin,
 }: {
   userName?: string
   userId?: number
+  userRole?: string
   onLogout?: () => void
   onOpenAdmin?: () => void
 }) {
@@ -57,11 +58,8 @@ export default function DashboardApp({
   const page: PageKey = ROUTE_MAP[pathSegment] || 'feed'
 
   useEffect(() => {
-    if (!userId) return
-    getUserSubscription(userId)
-      .then((data) => setHasPremium(data.hasPremium))
-      .catch(() => setHasPremium(false))
-  }, [userId])
+    setHasPremium(userRole === 'premium' || userRole === 'admin')
+  }, [userRole])
 
   function handleNavigate(key: PageKey) {
     navigate(KEY_TO_ROUTE[key])

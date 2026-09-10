@@ -36,6 +36,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function App() {
   const [userName, setUserName] = useState('')
   const [userId, setUserId] = useState<number | undefined>()
+  const [userRole, setUserRole] = useState<string>('')
   const [checking, setChecking] = useState(true)
 
   useEffect(() => {
@@ -66,6 +67,7 @@ function App() {
       .then((user) => {
         setUserName(user.name)
         setUserId(user.id)
+        setUserRole(user.role)
       })
       .catch(() => {
         localStorage.removeItem('token')
@@ -100,6 +102,7 @@ function App() {
               <DashboardApp
                 userName={userName}
                 userId={userId}
+                userRole={userRole}
                 onLogout={handleLogout}
                 onOpenAdmin={() => window.location.href = '/admin'}
               />
