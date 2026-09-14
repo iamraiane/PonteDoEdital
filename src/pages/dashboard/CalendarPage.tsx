@@ -1,6 +1,7 @@
-import { useMemo, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { DashIcon } from './Icons'
 import { type PageKey } from './DashboardShell'
+import { getFavorites, type Favorite } from '../../services/favorite'
 import './CalendarPage.css'
 
 const WEEKDAYS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
@@ -9,15 +10,51 @@ const MONTHS = [
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
 ]
 
+function toDateKey(year: number, month: number, day: number): string {
+  const m = String(month + 1).padStart(2, '0')
+  const d = String(day).padStart(2, '0')
+  return `${year}-${m}-${d}`
+}
+
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00')
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
 export default function CalendarPage({
   hasPremium = false,
+  userId,
   onNavigate,
 }: {
   hasPremium?: boolean
+  userId?: number
   onNavigate?: (page: PageKey) => void
 }) {
-  const [cursor, setCursor] = useState({ year: 2026, month: 6 }) // Julho 2026
+  const [cursor, setCursor] = useState({ year: 2026, month: 6 })
   const [selected, setSelected] = useState(12)
+  const [favorites, setFavorites] = useState<Favorite[]>([])
+
+  useEffect(() => {
+    if (!userId) return
+    getFavorites()
+      .then(setFavorites)
+      .catch(() => {})
+  }, [userId])
+
+  const deadlineMap = useMemo(() => {
+    const map = new Map<string, Favorite[]>()
+    for (const fav of favorites) {
+      const dateStr = fav.notice.publication_date
+      if (!dateStr) continue
+      const existing = map.get(dateStr)
+      if (existing) existing.push(fav)
+      else map.set(dateStr, [fav])
+    }
+    return map
+  }, [favorites])
+
+  const selectedKey = selected > 0 ? toDateKey(cursor.year, cursor.month, selected) : null
+  const selectedFavorites = selectedKey ? deadlineMap.get(selectedKey) ?? [] : []
 
   const cells = useMemo(() => {
     const firstWeekday = new Date(cursor.year, cursor.month, 1).getDay()
@@ -40,8 +77,8 @@ export default function CalendarPage({
   }
 
   return (
-    <div className="pdd-calendar-page pdd-calendar-page--full">
-      <h1 className="pdd-page-title">Calendário</h1>
+    <div className="pdd-calendar-page">
+      <h1 className="pdd-page-title">Calendario</h1>
 
       <div className="pdd-calendar-card">
         {!hasPremium && (
@@ -63,10 +100,10 @@ export default function CalendarPage({
         <div className="pdd-calendar-card__head">
           <p>{MONTHS[cursor.month]} {cursor.year}</p>
           <div className="pdd-calendar-nav">
-            <button type="button" onClick={() => changeMonth(-1)} aria-label="Mês anterior">
+            <button type="button" onClick={() => changeMonth(-1)} aria-label="Mes anterior">
               <DashIcon name="chevron-left" />
             </button>
-            <button type="button" onClick={() => changeMonth(1)} aria-label="Próximo mês">
+            <button type="button" onClick={() => changeMonth(1)} aria-label="Proximo mes">
               <DashIcon name="chevron-right" />
             </button>
           </div>
@@ -83,20 +120,58 @@ export default function CalendarPage({
           key={`${cursor.year}-${cursor.month}`}
           style={{ '--pdd-cal-rows': Math.ceil(cells.length / 7) } as CSSProperties}
         >
-          {cells.map((day, i) => (
-            <button
-              key={i}
-              type="button"
-              disabled={day === null}
-              className={`pdd-calendar-day ${day === selected ? 'is-selected' : ''} ${day === null ? 'is-empty' : ''}`}
-              style={{ animationDelay: `${i * 10}ms` }}
-              onClick={() => day !== null && setSelected(day)}
-            >
-              {day}
-            </button>
-          ))}
+          {cells.map((day, i) => {
+            const hasEvents = day !== null && deadlineMap.has(toDateKey(cursor.year, cursor.month, day))
+            return (
+              <button
+                key={i}
+                type="button"
+                disabled={day === null}
+                className={`pdd-calendar-day ${day === selected ? 'is-selected' : ''} ${day === null ? 'is-empty' : ''} ${hasEvents ? 'has-events' : ''}`}
+                style={{ animationDelay: `${i * 10}ms` }}
+                onClick={() => day !== null && setSelected(day)}
+              >
+                {day}
+                {hasEvents && <span className="pdd-calendar-day__dot" />}
+              </button>
+            )
+          })}
         </div>
       </div>
+
+      {selectedFavorites.length > 0 && (
+        <div className="pdd-calendar-events">
+          <h2 className="pdd-calendar-events__title">
+            Prazos para {selected > 0 ? `${selected} de ${MONTHS[cursor.month]}` : ''}
+          </h2>
+          <div className="pdd-calendar-events__list">
+            {selectedFavorites.map((fav) => {
+              const n = fav.notice
+              return (
+                <article key={fav.id} className="pdd-calendar-event-card">
+                  <div className="pdd-calendar-event-card__info">
+                    <span className="pdd-calendar-event-card__org">
+                      {n.state_code || n.state || 'Edital'}
+                    </span>
+                    <h3 className="pdd-calendar-event-card__title">{n.title}</h3>
+                    <p className="pdd-calendar-event-card__date">
+                      <DashIcon name="clock" /> {formatDate(n.publication_date!)}
+                    </p>
+                  </div>
+                  <a
+                    href={n.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="pdd-calendar-event-card__link"
+                  >
+                    <DashIcon name="arrow" /> Ver detalhes
+                  </a>
+                </article>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
