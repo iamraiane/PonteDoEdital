@@ -39,6 +39,7 @@ export type LoginResponse = {
 
 export type RegisterResponse = {
   message: string
+  token: string
 }
 
 export type UserData = {
@@ -60,10 +61,10 @@ export async function login(identifier: string, password: string): Promise<Login
   })
 }
 
-export async function register(name: string, email: string, password: string, cpf: string, dataNascimento: string): Promise<RegisterResponse> {
+export async function register(name: string, email: string, password: string, cpf: string, dataNascimento: string, preferences?: string[], stateCode?: string): Promise<RegisterResponse> {
   return request<RegisterResponse>('users', {
     method: 'POST',
-    body: JSON.stringify({ name, email, password, cpf, data_nascimento: dataNascimento }),
+    body: JSON.stringify({ name, email, password, cpf, data_nascimento: dataNascimento, preferences, state_code: stateCode }),
   })
 }
 
@@ -86,6 +87,26 @@ export async function resetPassword(token: string, password: string): Promise<{ 
   return request<{ message: string }>('auth/reset-password', {
     method: 'POST',
     body: JSON.stringify({ token, password }),
+  })
+}
+
+export type UpdateUserData = {
+  name?: string
+  state?: string
+  preferences?: string[]
+}
+
+export async function updateUser(id: number, data: UpdateUserData): Promise<{ message: string }> {
+  return authRequest<{ message: string }>(`users/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function verifyEmail(token: string): Promise<{ message: string }> {
+  return request<{ message: string }>('verify-email', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
   })
 }
 

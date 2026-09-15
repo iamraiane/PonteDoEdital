@@ -840,6 +840,21 @@ html, body {
   color: var(--teal);
 }
 
+.pde-done__sub {
+  font-size: 0.88rem;
+  color: var(--muted);
+  margin: 0;
+  text-align: center;
+  max-width: 26rem;
+  line-height: 1.5;
+  opacity: 0;
+  animation: pde-fade-up 0.5s 0.25s ease forwards;
+}
+
+.pde-done__sub strong {
+  color: var(--ink);
+}
+
 /* ---------- rodapé login ---------- */
 
 .pde-login-hint {

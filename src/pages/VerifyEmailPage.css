@@ -1,0 +1,31 @@
+/* ==========================================================================
+   Ponte do Edital — Verify Email Page
+   ========================================================================== */
+
+@import url('./RecoverFlow.css');
+
+.pde-login-success__ring--error {
+  background: #fde8e8;
+  color: var(--danger);
+}
+
+.pde-login-success__ring--error svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.pde-login-success__ring--loading {
+  background: var(--teal-soft);
+  color: var(--teal);
+  animation: pde-spin-ring 1.2s linear infinite;
+}
+
+.pde-login-success__ring--loading svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+@keyframes pde-spin-ring {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

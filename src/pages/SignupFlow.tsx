@@ -2,7 +2,7 @@ import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
 import { useNavigate } from 'react-router-dom'
 import logoNome from '../assets/logo-nome.png'
 import logoPonte from '../assets/logo-ponte.png'
-import { register } from '../services/user'
+import { register, updateUser, getTokenPayload } from '../services/user'
 import { sanitizeInput, sanitizeName, sanitizeEmail, validateName, validateEmail, validatePassword, sanitizeCpf, formatCpf, validateCpf } from '../utils/validation'
 import './SignupFlow.css'
 
@@ -179,6 +179,8 @@ export default function SignupFlow() {
   const [cpfTouched, setCpfTouched] = useState(false)
   const [termsError, setTermsError] = useState('')
   const [dataNascimentoError, setDataNascimentoError] = useState('')
+  const [userId, setUserId] = useState<number | null>(null)
+  const [userEmail, setUserEmail] = useState('')
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true))
@@ -228,8 +230,12 @@ export default function SignupFlow() {
     setEmailError('')
     setCpfError('')
 
-    register(form.nome, form.email, form.senha, sanitizeCpf(form.cpf), form.dataNascimento)
-      .then(() => {
+    register(form.nome, form.email, form.senha, sanitizeCpf(form.cpf), form.dataNascimento, form.interesses, form.estado)
+      .then((data) => {
+        localStorage.setItem('token', data.token)
+        const payload = getTokenPayload()
+        if (payload?.id) setUserId(payload.id)
+        setUserEmail(form.email)
         setStatus('idle')
         goTo(2, 1)
       })
@@ -252,7 +258,13 @@ export default function SignupFlow() {
       triggerShake()
       return
     }
-    goTo(3, 1)
+    if (userId) {
+      updateUser(userId, { preferences: form.interesses })
+        .then(() => goTo(3, 1))
+        .catch(() => goTo(3, 1))
+    } else {
+      goTo(3, 1)
+    }
   }
 
   function handleNomeChange(value: string) {
@@ -299,6 +311,7 @@ export default function SignupFlow() {
   }
 
   function handleFinish() {
+    localStorage.removeItem('token')
     navigate('/login')
   }
 
@@ -398,6 +411,7 @@ export default function SignupFlow() {
               {step === 3 && (
                 <StepDone
                   firstName={form.nome.trim().split(' ')[0] || 'visitante'}
+                  email={userEmail}
                   onBack={() => goTo(2, -1)}
                   onFinish={handleFinish}
                   status={status}
@@ -757,12 +771,14 @@ function StepInterests({
 
 function StepDone({
   firstName,
+  email,
   onBack,
   onFinish,
   status,
   errorMessage,
 }: {
   firstName: string
+  email: string
   onBack: () => void
   onFinish?: () => void
   status?: 'idle' | 'loading' | 'error'
@@ -774,7 +790,11 @@ function StepDone({
         <p className="pde-error">{errorMessage}</p>
       )}
       <p className="pde-done__title">
-        Tudo pronto, <span>{firstName}</span>!
+        Verifique seu <span>email</span>
+      </p>
+      <p className="pde-done__sub">
+        Enviamos um link de confirmação para <strong>{email}</strong>.
+        Clique no link para ativar sua conta antes de fazer login.
       </p>
 
       <div className="pde-actions">
@@ -783,13 +803,11 @@ function StepDone({
         </button>
         <button
           type="button"
-          className={`pde-btn pde-btn--primary ${status === 'loading' ? 'is-loading' : ''}`}
+          className="pde-btn pde-btn--primary"
           onClick={onFinish}
-          disabled={status === 'loading'}
         >
-          <span className="pde-btn__label">Criar conta</span>
+          <span className="pde-btn__label">Ir para o login</span>
           <Icon name="arrow" />
-          <span className="pde-btn__spinner" aria-hidden="true" />
         </button>
       </div>
     </div>
