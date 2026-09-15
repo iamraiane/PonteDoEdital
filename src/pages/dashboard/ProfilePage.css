@@ -287,3 +287,22 @@
     font-size: 0.85rem;
   }
 }
+
+.pdd-profile-field--readonly {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background: #c3d5d8 !important;
+}
+
+.pdd-profile-field__error {
+  color: #d32f2f;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-top: 0.2rem;
+}
+
+.pdd-profile-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}

@@ -46,6 +46,10 @@ export type UserData = {
   id: number
   name: string
   email: string
+  cpf: string
+  data_nascimento: string
+  state_code: string
+  preferences: string[]
   role: string
 }
 
@@ -92,7 +96,7 @@ export async function resetPassword(token: string, password: string): Promise<{ 
 
 export type UpdateUserData = {
   name?: string
-  state?: string
+  state_code?: string
   preferences?: string[]
 }
 

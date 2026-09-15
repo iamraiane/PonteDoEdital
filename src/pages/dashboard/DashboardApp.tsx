@@ -8,6 +8,7 @@ import PlansPage from './PlansPage'
 import FaqPage from './FaqPage'
 import AboutPage from './AboutPage'
 import ProfilePage, { type ProfileData } from './ProfilePage'
+import { getUserById, updateUser } from '../../services/user'
 
 const ROUTE_MAP: Record<string, PageKey> = {
   feed: 'feed',
@@ -46,13 +47,31 @@ export default function DashboardApp({
   const location = useLocation()
   const [hasPremium, setHasPremium] = useState(false)
   const [profile, setProfile] = useState<ProfileData>({
-    nome: userName === 'Raiane' ? 'Raiane de Oliveira Cecílio' : userName,
-    email: 'pontedoedital@gmail.com',
-    telefone: '',
-    regiao: 'Sudeste',
-    interesses: ['Tecnologia', 'Engenharia'],
+    nome: userName || '',
+    email: '',
+    cpf: '',
+    dataNascimento: '',
+    estado: '',
+    interesses: [],
     avatarUrl: null,
   })
+
+  useEffect(() => {
+    if (!userId) return
+    getUserById(userId)
+      .then((data) => {
+        setProfile({
+          nome: data.name || '',
+          email: data.email || '',
+          cpf: data.cpf || '',
+          dataNascimento: data.data_nascimento || '',
+          estado: data.state_code || '',
+          interesses: data.preferences || [],
+          avatarUrl: null,
+        })
+      })
+      .catch(console.error)
+  }, [userId])
 
   const pathSegment = location.pathname.split('/')[2] || 'feed'
   const page: PageKey = ROUTE_MAP[pathSegment] || 'feed'
@@ -60,6 +79,15 @@ export default function DashboardApp({
   useEffect(() => {
     setHasPremium(userRole === 'premium' || userRole === 'admin')
   }, [userRole])
+
+  async function handleSaveProfile() {
+    if (!userId) return
+    await updateUser(userId, {
+      name: profile.nome,
+      state_code: profile.estado,
+      preferences: profile.interesses,
+    })
+  }
 
   function handleNavigate(key: PageKey) {
     navigate(KEY_TO_ROUTE[key])
@@ -87,7 +115,7 @@ export default function DashboardApp({
         <Route path="plans" element={<PlansPage />} />
         <Route path="faq" element={<FaqPage />} />
         <Route path="about" element={<AboutPage />} />
-        <Route path="profile" element={<ProfilePage profile={profile} onChange={setProfile} />} />
+        <Route path="profile" element={<ProfilePage profile={profile} onChange={setProfile} onSave={handleSaveProfile} />} />
       </Routes>
     </DashboardShell>
   )

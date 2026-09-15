@@ -1,5 +1,6 @@
 import { useRef, useState, type ChangeEvent } from 'react'
 import { DashIcon, DashAvatar } from './Icons'
+import { sanitizeName, validateName, formatCpf } from '../../utils/validation'
 import './ProfilePage.css'
 
 const INTERESSES = [
@@ -7,11 +8,42 @@ const INTERESSES = [
   'Cultura', 'Serviços', 'Consultoria', 'Engenharia',
 ]
 
+const ESTADOS = [
+  { value: 'AC', label: 'Acre' },
+  { value: 'AL', label: 'Alagoas' },
+  { value: 'AP', label: 'Amapá' },
+  { value: 'AM', label: 'Amazonas' },
+  { value: 'BA', label: 'Bahia' },
+  { value: 'CE', label: 'Ceará' },
+  { value: 'DF', label: 'Distrito Federal' },
+  { value: 'ES', label: 'Espírito Santo' },
+  { value: 'GO', label: 'Goiás' },
+  { value: 'MA', label: 'Maranhão' },
+  { value: 'MT', label: 'Mato Grosso' },
+  { value: 'MS', label: 'Mato Grosso do Sul' },
+  { value: 'MG', label: 'Minas Gerais' },
+  { value: 'PA', label: 'Pará' },
+  { value: 'PB', label: 'Paraíba' },
+  { value: 'PR', label: 'Paraná' },
+  { value: 'PE', label: 'Pernambuco' },
+  { value: 'PI', label: 'Piauí' },
+  { value: 'RJ', label: 'Rio de Janeiro' },
+  { value: 'RN', label: 'Rio Grande do Norte' },
+  { value: 'RS', label: 'Rio Grande do Sul' },
+  { value: 'RO', label: 'Rondônia' },
+  { value: 'RR', label: 'Roraima' },
+  { value: 'SC', label: 'Santa Catarina' },
+  { value: 'SP', label: 'São Paulo' },
+  { value: 'SE', label: 'Sergipe' },
+  { value: 'TO', label: 'Tocantins' },
+]
+
 export type ProfileData = {
   nome: string
   email: string
-  telefone: string
-  regiao: string
+  cpf: string
+  dataNascimento: string
+  estado: string
   interesses: string[]
   avatarUrl: string | null
 }
@@ -19,16 +51,27 @@ export type ProfileData = {
 export default function ProfilePage({
   profile,
   onChange,
+  onSave,
 }: {
   profile: ProfileData
   onChange: (next: ProfileData) => void
+  onSave: () => Promise<void>
 }) {
   const [saved, setSaved] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [nameError, setNameError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   function set<K extends keyof ProfileData>(key: K, value: ProfileData[K]) {
     onChange({ ...profile, [key]: value })
     setSaved(false)
+  }
+
+  function handleNomeChange(e: ChangeEvent<HTMLInputElement>) {
+    const sanitized = sanitizeName(e.target.value)
+    set('nome', sanitized)
+    const error = validateName(sanitized)
+    setNameError(error)
   }
 
   function toggleInteresse(item: string) {
@@ -46,10 +89,25 @@ export default function ProfilePage({
     set('avatarUrl', url)
   }
 
-  function handleSave() {
-    setSaved(true)
-    window.setTimeout(() => setSaved(false), 2200)
+  async function handleSave() {
+    const error = validateName(profile.nome)
+    if (error) {
+      setNameError(error)
+      return
+    }
+    setSaving(true)
+    try {
+      await onSave()
+      setSaved(true)
+      setNameError(null)
+      window.setTimeout(() => setSaved(false), 2200)
+    } catch {
+    } finally {
+      setSaving(false)
+    }
   }
+
+  const formattedCpf = profile.cpf ? formatCpf(profile.cpf) : ''
 
   return (
     <div className="pdd-profile-page">
@@ -94,34 +152,44 @@ export default function ProfilePage({
             <input
               type="text"
               value={profile.nome}
-              onChange={(e) => set('nome', e.target.value)}
+              onChange={handleNomeChange}
             />
+            {nameError && <span className="pdd-profile-field__error">{nameError}</span>}
           </label>
           <label className="pdd-profile-field">
             <span>E-mail</span>
             <input
               type="email"
               value={profile.email}
-              onChange={(e) => set('email', e.target.value)}
+              disabled
+              className="pdd-profile-field--readonly"
             />
           </label>
           <label className="pdd-profile-field">
-            <span>Telefone</span>
+            <span>CPF</span>
             <input
-              type="tel"
-              placeholder="(99) 99999-9999"
-              value={profile.telefone}
-              onChange={(e) => set('telefone', e.target.value)}
+              type="text"
+              value={formattedCpf}
+              disabled
+              className="pdd-profile-field--readonly"
             />
           </label>
           <label className="pdd-profile-field">
-            <span>Região</span>
-            <select value={profile.regiao} onChange={(e) => set('regiao', e.target.value)}>
-              <option value="Norte">Norte</option>
-              <option value="Nordeste">Nordeste</option>
-              <option value="Centro-Oeste">Centro-Oeste</option>
-              <option value="Sudeste">Sudeste</option>
-              <option value="Sul">Sul</option>
+            <span>Data de nascimento</span>
+            <input
+              type="text"
+              value={profile.dataNascimento ? new Date(profile.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR') : ''}
+              disabled
+              className="pdd-profile-field--readonly"
+            />
+          </label>
+          <label className="pdd-profile-field">
+            <span>Estado</span>
+            <select value={profile.estado} onChange={(e) => set('estado', e.target.value)}>
+              <option value="">Selecione</option>
+              {ESTADOS.map((uf) => (
+                <option key={uf.value} value={uf.value}>{uf.label} ({uf.value})</option>
+              ))}
             </select>
           </label>
         </div>
@@ -151,8 +219,15 @@ export default function ProfilePage({
       </section>
 
       <div className="pdd-profile-save-row">
-        <button type="button" className="pdd-profile-save" onClick={handleSave}>
-          {saved ? (
+        <button
+          type="button"
+          className="pdd-profile-save"
+          onClick={handleSave}
+          disabled={saving}
+        >
+          {saving ? (
+            'Salvando...'
+          ) : saved ? (
             <>
               <DashIcon name="check" /> Salvo!
             </>
