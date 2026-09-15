@@ -770,7 +770,6 @@ function StepInterests({
 }
 
 function StepDone({
-  firstName,
   email,
   onBack,
   onFinish,
