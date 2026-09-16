@@ -106,7 +106,7 @@ function App() {
                 userId={userId}
                 userRole={userRole}
                 onLogout={handleLogout}
-                onOpenAdmin={() => window.location.href = '/admin'}
+                onOpenAdmin={userRole === 'admin' ? () => window.location.href = '/admin' : undefined}
               />
             </ProtectedRoute>
           }
