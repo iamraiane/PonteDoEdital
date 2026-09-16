@@ -19,8 +19,8 @@ export default function AdminShell({
   onLogout,
   children,
 }: {
-  active: AdminPageKey
-  onNavigate: (page: AdminPageKey) => void
+  active: string
+  onNavigate: (page: string) => void
   onExitAdmin?: () => void
   onLogout?: () => void
   children: ReactNode

@@ -1,43 +1,46 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { DashIcon } from '../dashboard/Icons'
+import { getAllUsers, promoteToAdmin, demoteToUser, getTokenPayload } from '../../services/user'
+import type { UserData } from '../../services/user'
 import './EditaisPage.css'
 import './UsuariosPage.css'
-
-type StatusUsuario = 'Admin' | 'Ativo' | 'Inativo'
-type PlanoUsuario = 'Premium' | 'Grátis'
-
-type Usuario = {
-  id: string
-  nome: string
-  email: string
-  status: StatusUsuario
-  plano: PlanoUsuario
-}
-
-const INITIAL_USUARIOS: Usuario[] = [
-  { id: 'u1', nome: 'Raiane Cecílio', email: 'pontedoedital@gmail.com', status: 'Admin', plano: 'Premium' },
-  { id: 'u2', nome: 'Gustavo Nori', email: 'gustavonori@gmail.com', status: 'Admin', plano: 'Premium' },
-  { id: 'u3', nome: 'Vitor Mapeli', email: 'vitormapeli@gmail.com', status: 'Admin', plano: 'Premium' },
-  { id: 'u4', nome: 'Gustavo Del Vechio', email: 'gustavovechio@gmail.com', status: 'Ativo', plano: 'Premium' },
-  { id: 'u5', nome: 'Luciano Barros', email: 'lucianobarros@gmail.com', status: 'Ativo', plano: 'Grátis' },
-  { id: 'u6', nome: 'Carlos Filho', email: 'carlosfilho@gmail.com', status: 'Ativo', plano: 'Grátis' },
-]
 
 function iniciais(nome: string) {
   return nome.split(' ').slice(0, 2).map((p) => p[0]).join('').toUpperCase()
 }
 
 export default function UsuariosPage() {
-  const [usuarios, setUsuarios] = useState<Usuario[]>(INITIAL_USUARIOS)
+  const navigate = useNavigate()
+  const currentUserId = getTokenPayload()?.id
+  const [usuarios, setUsuarios] = useState<UserData[]>([])
   const [busca, setBusca] = useState('')
   const [mostrarTodos, setMostrarTodos] = useState(true)
-  const [editando, setEditando] = useState<Usuario | null>(null)
+  const [editando, setEditando] = useState<UserData | null>(null)
   const [toast, setToast] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadUsers()
+  }, [])
+
+  async function loadUsers() {
+    try {
+      setLoading(true)
+      const data = await getAllUsers()
+      setUsuarios(data)
+    } catch (err) {
+      console.error('Erro ao carregar usuários:', err)
+      avisar('Erro ao carregar usuários')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const termo = busca.toLowerCase()
   const filtrados = usuarios.filter((u) => {
-    const bate = u.nome.toLowerCase().includes(termo) || u.email.toLowerCase().includes(termo)
-    if (!mostrarTodos) return bate && u.status === 'Ativo'
+    const bate = u.name.toLowerCase().includes(termo) || u.email.toLowerCase().includes(termo)
+    if (!mostrarTodos) return bate && u.role === 'user'
     return bate
   })
 
@@ -46,14 +49,47 @@ export default function UsuariosPage() {
     setTimeout(() => setToast(null), 2200)
   }
 
-  function salvarStatus(id: string, isAdmin: boolean, desabilitado: boolean) {
-    setUsuarios((prev) =>
-      prev.map((u) =>
-        u.id === id ? { ...u, status: desabilitado ? 'Inativo' : isAdmin ? 'Admin' : 'Ativo' } : u
+  async function salvarStatus(id: number, isAdmin: boolean) {
+    try {
+      if (isAdmin) {
+        await promoteToAdmin(id)
+        avisar('Usuário promovido a admin')
+      } else {
+        await demoteToUser(id)
+        if (id === currentUserId) {
+          navigate('/dashboard')
+          return
+        }
+        avisar('Usuário removido de admin')
+      }
+      setUsuarios((prev) =>
+        prev.map((u) => (u.id === id ? { ...u, role: isAdmin ? 'admin' : 'user' } : u))
       )
+      setEditando(null)
+    } catch (err) {
+      console.error('Erro ao atualizar status:', err)
+      avisar('Erro ao atualizar status')
+    }
+  }
+
+  function getRoleLabel(role: string) {
+    switch (role) {
+      case 'admin':
+        return 'Admin'
+      case 'premium':
+        return 'Premium'
+      default:
+        return 'Ativo'
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="pda-usuarios-page">
+        <h1 className="pda-page-title">Gerenciamento de Usuários</h1>
+        <p className="pda-page-sub">Carregando usuários...</p>
+      </div>
     )
-    setEditando(null)
-    avisar('Status atualizado')
   }
 
   return (
@@ -92,29 +128,29 @@ export default function UsuariosPage() {
               <th>Usuário</th>
               <th>E-mail</th>
               <th>Status</th>
-              <th>Plano</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {filtrados.length === 0 && (
               <tr className="pda-empty-row">
-                <td colSpan={5}>Nenhum usuário encontrado.</td>
+                <td colSpan={4}>Nenhum usuário encontrado.</td>
               </tr>
             )}
             {filtrados.map((u, i) => (
               <tr key={u.id} style={{ animationDelay: `${i * 40}ms` }}>
                 <td data-label="Usuário">
                   <div className="pda-user-cell">
-                    <span className="pda-avatar">{iniciais(u.nome)}</span>
-                    <span className="pda-cell-title">{u.nome}</span>
+                    <span className="pda-avatar">{iniciais(u.name)}</span>
+                    <span className="pda-cell-title">{u.name}</span>
                   </div>
                 </td>
                 <td data-label="E-mail">{u.email}</td>
                 <td data-label="Status">
-                  <span className={`pda-badge pda-badge--${u.status.toLowerCase()}`}>{u.status}</span>
+                  <span className={`pda-badge pda-badge--${u.role === 'admin' ? 'admin' : u.role === 'premium' ? 'premium' : 'ativo'}`}>
+                    {getRoleLabel(u.role)}
+                  </span>
                 </td>
-                <td data-label="Plano">{u.plano}</td>
                 <td className="pda-actions-cell pda-actions-cell--single" data-label="Ações">
                   <button
                     type="button"
@@ -144,12 +180,11 @@ function EditarStatusModal({
   onCancel,
   onSave,
 }: {
-  usuario: Usuario
+  usuario: UserData
   onCancel: () => void
-  onSave: (id: string, isAdmin: boolean, desabilitado: boolean) => void
+  onSave: (id: number, isAdmin: boolean) => void
 }) {
-  const [isAdmin, setIsAdmin] = useState(usuario.status === 'Admin')
-  const [desabilitado, setDesabilitado] = useState(usuario.status === 'Inativo')
+  const [isAdmin, setIsAdmin] = useState(usuario.role === 'admin')
 
   return (
     <div className="pda-overlay" onClick={onCancel}>
@@ -158,7 +193,7 @@ function EditarStatusModal({
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="pda-modal-title">Editar Status</h2>
-        <p className="pda-modal-note pda-modal-note--tight">{usuario.nome}</p>
+        <p className="pda-modal-note pda-modal-note--tight">{usuario.name}</p>
 
         <div className="pda-status-row">
           Habilitar para Admin
@@ -172,13 +207,13 @@ function EditarStatusModal({
           </button>
         </div>
 
-        <div className="pda-status-row">
+        <div className="pda-status-row" style={{ opacity: 0.5, cursor: 'not-allowed' }}>
           Desabilitar usuário
           <button
             type="button"
-            className={`pda-switch ${desabilitado ? 'is-on' : ''}`}
-            aria-pressed={desabilitado}
-            onClick={() => setDesabilitado((v) => !v)}
+            className="pda-switch"
+            disabled
+            title="Em breve"
           >
             <span className="pda-switch__knob" />
           </button>
@@ -188,7 +223,7 @@ function EditarStatusModal({
           type="button"
           className="pda-btn pda-btn--teal"
           style={{ marginTop: '1.1rem' }}
-          onClick={() => onSave(usuario.id, isAdmin, desabilitado)}
+          onClick={() => onSave(usuario.id, isAdmin)}
         >
           Salvar
         </button>

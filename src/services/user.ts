@@ -124,3 +124,15 @@ export function getTokenPayload(): { id: number; role: string } | null {
     return null
   }
 }
+
+export async function getAllUsers(): Promise<UserData[]> {
+  return authRequest<UserData[]>('users')
+}
+
+export async function promoteToAdmin(id: number): Promise<{ message: string }> {
+  return authRequest<{ message: string }>(`users/${id}/promote`, { method: 'PATCH' })
+}
+
+export async function demoteToUser(id: number): Promise<{ message: string }> {
+  return authRequest<{ message: string }>(`users/${id}/demote`, { method: 'PATCH' })
+}
