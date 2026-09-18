@@ -1,12 +1,3 @@
-/* ==========================================================================
-   Ponte do Edital — Reset global
-   (Antes havia estilos de boilerplate do template Vite aqui, incluindo um
-   font-size responsivo no :root que reescalava TODOS os elementos em rem
-   do app — logos, botões, menus — de forma independente dos breakpoints
-   de cada tela. Isso causava saltos de tamanho inesperados perto de
-   1024px. Substituído por um reset simples e neutro.)
-   ========================================================================== */
-
 *,
 *::before,
 *::after {

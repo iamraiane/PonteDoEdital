@@ -2,8 +2,6 @@
    Ponte do Edital — Signup Flow
    Paleta: navy #10263A, teal #1CA98C, teal claro #45D6B8, bg claro #EAEFF3
    ========================================================================== */
-
-/* reset para garantir tela cheia de verdade, sem margens/scrollbars do navegador */
 html, body {
   margin: 0;
   padding: 0;

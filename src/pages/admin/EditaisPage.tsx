@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { DashIcon } from '../dashboard/Icons'
-import { getNotices, type NoticeApi } from '../../services/notice'
+import { getNotices, updateNotice, deleteNotice, type NoticeApi } from '../../services/notice'
 import { getTokenPayload } from '../../services/user'
 import './EditaisPage.css'
 
@@ -8,13 +8,11 @@ type Edital = {
   id: string
   titulo: string
   orgao: string
-  categoria: string
-  modalidade: string
+  stateCode: string
+  description: string
   prazo: string
+  publicationDateISO: string
 }
-
-const CATEGORIAS = ['Infraestrutura', 'Saúde', 'Educação', 'Tecnologia', 'Serviços']
-const MODALIDADES = ['Concorrência', 'Pregão', 'Tomada de Preços', 'Convite']
 
 function mapNoticeToEdital(n: NoticeApi): Edital {
   const dateStr = n.publication_date
@@ -24,11 +22,12 @@ function mapNoticeToEdital(n: NoticeApi): Edital {
   }
   return {
     id: String(n.id),
-    titulo: n.description?.split('\n')[0]?.substring(0, 80) ?? n.title,
+    titulo: n.title,
     orgao: n.state ?? 'Órgão não informado',
-    categoria: 'Geral',
-    modalidade: 'Edital Público',
+    stateCode: n.state_code ?? '',
+    description: n.description ?? '',
     prazo,
+    publicationDateISO: n.publication_date ?? '',
   }
 }
 
@@ -62,17 +61,41 @@ export default function EditaisPage() {
     setTimeout(() => setToast(null), 2200)
   }
 
-  function salvarEdicao(atualizado: Edital) {
-    setEditais((prev) => prev.map((e) => (e.id === atualizado.id ? atualizado : e)))
-    setEditando(null)
-    avisar('Edital atualizado com sucesso')
+  function parseDataBR(dataBR: string, fallback: string): string {
+    try {
+      const d = new Date(dataBR)
+      if (!isNaN(d.getTime())) return d.toISOString().split('T')[0]
+    } catch {}
+    return fallback
   }
 
-  function excluir() {
+  async function salvarEdicao(atualizado: Edital) {
+    try {
+      await updateNotice(Number(atualizado.id), {
+        title: atualizado.titulo,
+        description: atualizado.description,
+        publication_date: parseDataBR(atualizado.prazo, atualizado.publicationDateISO),
+      })
+      setEditais((prev) => prev.map((e) => (e.id === atualizado.id ? { ...atualizado, publicationDateISO: parseDataBR(atualizado.prazo, atualizado.publicationDateISO) } : e)))
+      setEditando(null)
+      avisar('Edital atualizado com sucesso')
+    } catch (err) {
+      console.error('Erro ao atualizar edital:', err)
+      avisar('Erro ao atualizar edital')
+    }
+  }
+
+  async function excluir() {
     if (!excluindo) return
-    setEditais((prev) => prev.filter((e) => e.id !== excluindo.id))
-    setExcluindo(null)
-    avisar('Edital excluído')
+    try {
+      await deleteNotice(Number(excluindo.id))
+      setEditais((prev) => prev.filter((e) => e.id !== excluindo.id))
+      setExcluindo(null)
+      avisar('Edital excluído')
+    } catch (err) {
+      console.error('Erro ao excluir edital:', err)
+      avisar('Erro ao excluir edital')
+    }
   }
 
   return (
@@ -101,8 +124,9 @@ export default function EditaisPage() {
           <thead>
             <tr>
               <th>Título</th>
-              <th>Categoria</th>
-              <th>Modalidade</th>
+              <th>Estado</th>
+              <th>UF</th>
+              <th>Descrição</th>
               <th>Prazo</th>
               <th></th>
             </tr>
@@ -110,17 +134,18 @@ export default function EditaisPage() {
           <tbody>
             {filtrados.length === 0 && (
               <tr className="pda-empty-row">
-                <td colSpan={5}>Nenhum edital encontrado.</td>
+                <td colSpan={6}>Nenhum edital encontrado.</td>
               </tr>
             )}
             {filtrados.map((edital, i) => (
-              <tr key={edital.id} style={{ animationDelay: `${i * 40}ms` }}>
+              <tr key={edital.id} className={menuAberto === edital.id ? 'pda-row--menu-open' : ''} style={{ animationDelay: `${i * 40}ms` }}>
                 <td data-label="Título">
                   <span className="pda-cell-title">{edital.titulo}</span>
                   <span className="pda-cell-sub">{edital.orgao}</span>
                 </td>
-                <td data-label="Categoria">{edital.categoria}</td>
-                <td data-label="Modalidade">{edital.modalidade}</td>
+                <td data-label="Estado">{edital.orgao}</td>
+                <td data-label="UF">{edital.stateCode}</td>
+                <td data-label="Descrição"><span className="pda-cell-desc">{edital.description}</span></td>
                 <td className="pda-cell-prazo" data-label="Prazo">{edital.prazo}</td>
                 <td className="pda-actions-cell" data-label="Ações">
                   <button
@@ -165,7 +190,7 @@ export default function EditaisPage() {
       )}
 
       {editando && (
-        <EditarEditalModal
+        <EditarEditalSidePanel
           edital={editando}
           onCancel={() => setEditando(null)}
           onSave={salvarEdicao}
@@ -185,7 +210,7 @@ export default function EditaisPage() {
   )
 }
 
-function EditarEditalModal({
+function EditarEditalSidePanel({
   edital,
   onCancel,
   onSave,
@@ -195,61 +220,91 @@ function EditarEditalModal({
   onSave: (e: Edital) => void
 }) {
   const [form, setForm] = useState<Edital>(edital)
+  const [panelTop, setPanelTop] = useState(80)
+
+  useEffect(() => {
+    const scrollContainer = document.querySelector('.pda-main')
+    if (!scrollContainer) return
+
+    function handleScroll() {
+      if (scrollContainer) {
+        setPanelTop(scrollContainer.scrollTop + 80)
+      }
+    }
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+    return () => scrollContainer.removeEventListener('scroll', handleScroll)
+  }, [])
 
   return (
-    <div className="pda-overlay" onClick={onCancel}>
-      <div className="pda-modal pda-modal--light" onClick={(e) => e.stopPropagation()}>
-        <h2 className="pda-modal-title">Editar edital</h2>
+    <>
+      <div className="pda-side-panel-overlay" onClick={onCancel} />
+      <div className="pda-side-panel" style={{ top: `${panelTop}px` }}>
+        <div className="pda-side-panel__header">
+          <h2 className="pda-side-panel__title">Editar edital</h2>
+          <button
+            type="button"
+            className="pda-side-panel__close"
+            onClick={onCancel}
+            aria-label="Fechar"
+          >
+            <DashIcon name="close" />
+          </button>
+        </div>
 
         <div className="pda-field">
           <label>Título</label>
           <textarea
-            rows={2}
+            rows={1}
             value={form.titulo}
             onChange={(e) => setForm({ ...form, titulo: e.target.value })}
           />
         </div>
 
-        <div className="pda-field-row">
-          <div className="pda-field">
-            <label>Prazo</label>
-            <input
-              type="text"
-              value={form.prazo}
-              onChange={(e) => setForm({ ...form, prazo: e.target.value })}
-              placeholder="Ex: 03 Ago 2026"
-            />
-          </div>
-          <div className="pda-field">
-            <label>Categoria</label>
-            <select
-              value={form.categoria}
-              onChange={(e) => setForm({ ...form, categoria: e.target.value })}
-            >
-              {CATEGORIAS.map((c) => (
-                <option key={c}>{c}</option>
-              ))}
-            </select>
-          </div>
+        <div className="pda-field">
+          <label>Estado</label>
+          <input
+            type="text"
+            value={form.orgao}
+            disabled
+            className="pda-field--readonly"
+          />
         </div>
 
         <div className="pda-field">
-          <label>Modalidade</label>
-          <select
-            value={form.modalidade}
-            onChange={(e) => setForm({ ...form, modalidade: e.target.value })}
-          >
-            {MODALIDADES.map((m) => (
-              <option key={m}>{m}</option>
-            ))}
-          </select>
+          <label>UF</label>
+          <input
+            type="text"
+            value={form.stateCode}
+            disabled
+            className="pda-field--readonly"
+          />
         </div>
 
-        <button type="button" className="pda-btn pda-btn--primary" onClick={() => onSave(form)}>
+        <div className="pda-field">
+          <label>Descrição</label>
+          <textarea
+            rows={1}
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+          />
+        </div>
+
+        <div className="pda-field">
+          <label>Data de publicação</label>
+          <input
+            type="text"
+            value={form.prazo}
+            onChange={(e) => setForm({ ...form, prazo: e.target.value })}
+            placeholder="Ex: 03 Ago 2026"
+          />
+        </div>
+
+        <button type="button" className="pda-btn pda-btn--teal" onClick={() => onSave(form)}>
           Salvar Alterações
         </button>
       </div>
-    </div>
+    </>
   )
 }
 

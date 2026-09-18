@@ -28,3 +28,16 @@ async function authRequest<T>(path: string, init?: RequestInit): Promise<T> {
 export async function getNotices(userId: number): Promise<NoticeApi[]> {
   return authRequest<NoticeApi[]>(`notices/user/${userId}`)
 }
+
+export async function updateNotice(id: number, data: Partial<NoticeApi>): Promise<NoticeApi> {
+  return authRequest<NoticeApi>(`notices/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function deleteNotice(id: number): Promise<{ message: string }> {
+  return authRequest<{ message: string }>(`notices/${id}`, {
+    method: 'DELETE',
+  })
+}

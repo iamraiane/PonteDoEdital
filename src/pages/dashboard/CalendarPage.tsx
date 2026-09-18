@@ -30,8 +30,9 @@ export default function CalendarPage({
   userId?: number
   onNavigate?: (page: PageKey) => void
 }) {
-  const [cursor, setCursor] = useState({ year: 2026, month: 6 })
-  const [selected, setSelected] = useState(12)
+  const now = new Date()
+  const [cursor, setCursor] = useState({ year: now.getFullYear(), month: now.getMonth() })
+  const [selected, setSelected] = useState(now.getDate())
   const [favorites, setFavorites] = useState<Favorite[]>([])
 
   useEffect(() => {

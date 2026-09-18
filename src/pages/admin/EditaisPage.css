@@ -180,11 +180,26 @@
   font-weight: 600;
 }
 
+.pda-cell-desc {
+  display: block;
+  max-width: 16rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #8fa1b3;
+  font-size: 0.82rem;
+}
+
 .pda-empty-row td {
   text-align: center;
   padding: 2.2rem;
   color: #8fa1b3;
   font-style: italic;
+}
+
+.pda-row--menu-open {
+  position: relative;
+  z-index: 35;
 }
 
 /* ---------- menu de ações da linha ---------- */
@@ -295,6 +310,136 @@
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
+/* ---------- painel lateral de edição ---------- */
+
+.pda-side-panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 27, 48, 0.75);
+  z-index: 99;
+  opacity: 0;
+  animation: pda-fade-in 0.2s ease forwards;
+}
+
+.pda-side-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 36rem;
+  max-width: 90vw;
+  max-height: 90vh;
+  background: var(--navy);
+  color: #fff;
+  z-index: 100;
+  padding: 1.2rem 1.4rem 1.4rem;
+  overflow-y: auto;
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.5);
+  transform: translateX(100%);
+  animation: pda-side-panel-in 0.3s cubic-bezier(0.2, 0.9, 0.25, 1.1) forwards;
+}
+
+@keyframes pda-side-panel-in {
+  to { transform: translateX(0); }
+}
+
+.pda-side-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.pda-side-panel__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+  color: #fff;
+}
+
+.pda-side-panel__close {
+  background: none;
+  border: none;
+  color: #9db2c5;
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.pda-side-panel__close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.pda-side-panel__close svg {
+  width: 18px;
+  height: 18px;
+}
+
+.pda-side-panel .pda-field {
+  margin-bottom: 0.6rem;
+}
+
+.pda-side-panel .pda-field label {
+  color: #9db2c5;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+.pda-side-panel .pda-field input,
+.pda-side-panel .pda-field select,
+.pda-side-panel .pda-field textarea {
+  width: 100%;
+  background: #162d42;
+  color: #fff;
+  border: 1px solid #2a5070;
+  border-radius: 9px;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.88rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  box-sizing: border-box;
+}
+
+.pda-side-panel .pda-field input:focus,
+.pda-side-panel .pda-field select:focus,
+.pda-side-panel .pda-field textarea:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(15, 155, 142, 0.25);
+}
+
+.pda-side-panel .pda-field select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #9db2c5 50%),
+    linear-gradient(135deg, #9db2c5 50%, transparent 50%);
+  background-position: calc(100% - 14px) 55%, calc(100% - 9px) 55%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.pda-side-panel .pda-field textarea {
+  resize: none;
+  min-height: 2.5rem;
+  overflow: hidden;
+}
+
+.pda-field--readonly {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #1a3a52 !important;
+  border-color: #1e3f56 !important;
+}
+
+.pda-side-panel .pda-btn--teal {
+  width: 100%;
+  margin-top: 0.3rem;
+}
+
 .pda-modal--light {
   background: var(--card);
   color: var(--ink);
@@ -306,6 +451,23 @@
   color: #fff;
   box-shadow: 0 24px 50px rgba(0, 0, 0, 0.5);
   text-align: center;
+}
+
+.pda-modal--dark .pda-field label {
+  color: #9db2c5;
+}
+
+.pda-modal--dark .pda-field input,
+.pda-modal--dark .pda-field select,
+.pda-modal--dark .pda-field textarea {
+  background: #162d42;
+  color: #fff;
+  border-color: #2a5070;
+}
+
+.pda-modal--dark .pda-btn--primary {
+  background: var(--teal-light);
+  color: #06231e;
 }
 
 .pda-modal-title {
