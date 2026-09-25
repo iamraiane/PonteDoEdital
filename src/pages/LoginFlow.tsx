@@ -149,7 +149,7 @@ export default function LoginFlow() {
       setStatus('success')
 
       window.setTimeout(() => {
-        navigate('/dashboard/feed')
+        window.location.href = '/dashboard/feed'
       }, 1300)
     })
     .catch(() => {
