@@ -45,6 +45,87 @@ const initialForm: FormData = {
   interesses: [],
 }
 
+// ---------- rascunho do cadastro (sessionStorage) ----------
+// Salva o preenchimento para não perder os dados em um refresh (F5).
+// As senhas nunca são gravadas: se o usuário der F5, basta redigitá-las.
+
+const DRAFT_KEY = 'signup-draft'
+
+type Draft = {
+  form: Omit<FormData, 'senha' | 'confirmarSenha'>
+  acceptTerms: boolean
+  step: 1 | 2 | 3
+  userEmail: string
+}
+
+function readDraft(): Draft | null {
+  try {
+    const raw = sessionStorage.getItem(DRAFT_KEY)
+    if (!raw) return null
+
+    const parsed = JSON.parse(raw) as Partial<Draft> | null
+    if (!parsed || typeof parsed !== 'object' || typeof parsed.form !== 'object' || parsed.form === null) {
+      return null
+    }
+
+    const f = parsed.form
+    const draft: Draft = {
+      form: {
+        nome: typeof f.nome === 'string' ? f.nome : '',
+        estado: typeof f.estado === 'string' && ESTADOS.includes(f.estado) ? f.estado : initialForm.estado,
+        cpf: typeof f.cpf === 'string' ? f.cpf : '',
+        dataNascimento: typeof f.dataNascimento === 'string' ? f.dataNascimento : '',
+        email: typeof f.email === 'string' ? f.email : '',
+        interesses: Array.isArray(f.interesses) && f.interesses.every((i) => typeof i === 'string')
+          ? f.interesses
+          : [],
+      },
+      acceptTerms: parsed.acceptTerms === true,
+      step: parsed.step === 2 || parsed.step === 3 ? parsed.step : 1,
+      userEmail: typeof parsed.userEmail === 'string' ? parsed.userEmail : '',
+    }
+
+    // Passo 2/3 pressupõe a conta já criada (token no localStorage).
+    // Sem token válido o rascunho não serve mais — descarta e recomeça.
+    if (draft.step > 1 && !getTokenPayload()?.id) {
+      clearDraft()
+      return null
+    }
+
+    return draft
+  } catch {
+    return null
+  }
+}
+
+function saveDraft(draft: Draft) {
+  try {
+    sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft))
+  } catch {
+    // storage indisponível (aba anônima, cota) — segue sem rascunho
+  }
+}
+
+function clearDraft() {
+  try {
+    sessionStorage.removeItem(DRAFT_KEY)
+  } catch {
+    // storage indisponível — nada a limpar
+  }
+}
+
+// Nunca grava senha/confirmarSenha no rascunho
+function toDraftForm({
+  nome,
+  estado,
+  cpf,
+  dataNascimento,
+  email,
+  interesses,
+}: FormData): Draft['form'] {
+  return { nome, estado, cpf, dataNascimento, email, interesses }
+}
+
 // ---------- validação de senha ----------
 
 type PasswordChecks = {
@@ -161,9 +242,12 @@ function Icon({ name }: { name: string }) {
 
 export default function SignupFlow() {
   const navigate = useNavigate()
-  const [step, setStep] = useState<1 | 2 | 3>(1)
+  const [draft] = useState<Draft | null>(readDraft)
+  const [step, setStep] = useState<1 | 2 | 3>(draft?.step ?? 1)
   const [direction, setDirection] = useState<1 | -1>(1)
-  const [form, setForm] = useState<FormData>(initialForm)
+  const [form, setForm] = useState<FormData>(() =>
+    draft ? { ...initialForm, ...draft.form } : initialForm
+  )
   const [showPassword, setShowPassword] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [shake, setShake] = useState(false)
@@ -174,18 +258,25 @@ export default function SignupFlow() {
   const [nomeError, setNomeError] = useState('')
   const [emailError, setEmailError] = useState('')
   const [senhaErrorMsg, setSenhaErrorMsg] = useState('')
-  const [acceptTerms, setAcceptTerms] = useState(false)
+  const [acceptTerms, setAcceptTerms] = useState(draft?.acceptTerms ?? false)
   const [cpfError, setCpfError] = useState('')
   const [cpfTouched, setCpfTouched] = useState(false)
   const [termsError, setTermsError] = useState('')
   const [dataNascimentoError, setDataNascimentoError] = useState('')
-  const [userId, setUserId] = useState<number | null>(null)
-  const [userEmail, setUserEmail] = useState('')
+  const [userId, setUserId] = useState<number | null>(() =>
+    draft && draft.step > 1 ? getTokenPayload()?.id ?? null : null
+  )
+  const [userEmail, setUserEmail] = useState(draft?.userEmail ?? '')
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true))
     return () => cancelAnimationFrame(t)
   }, [])
+
+  // Mantém o rascunho sempre atualizado (sem as senhas)
+  useEffect(() => {
+    saveDraft({ form: toDraftForm(form), acceptTerms, step, userEmail })
+  }, [form, acceptTerms, step, userEmail])
 
   useEffect(() => {
     if (form.dataNascimento.length > 0) setDataNascimentoError('')
@@ -311,6 +402,7 @@ export default function SignupFlow() {
   }
 
   function handleFinish() {
+    clearDraft()
     localStorage.removeItem('token')
     navigate('/login')
   }
@@ -427,6 +519,7 @@ export default function SignupFlow() {
               href="#entrar"
               onClick={(e) => {
                 e.preventDefault()
+                clearDraft()
                 navigate('/login')
               }}
             >
