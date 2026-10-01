@@ -8,6 +8,7 @@ import PlansPage from './PlansPage'
 import FaqPage from './FaqPage'
 import AboutPage from './AboutPage'
 import ProfilePage, { type ProfileData } from './ProfilePage'
+import { FeedFilterProvider } from './FeedFilterContext'
 import { getUserById, updateUser } from '../../services/user'
 
 const ROUTE_MAP: Record<string, PageKey> = {
@@ -97,26 +98,28 @@ export default function DashboardApp({
   const preference = profile.interesses.length > 0 ? profile.interesses.join(' & ') : undefined
 
   return (
-    <DashboardShell
-      active={page}
-      onNavigate={handleNavigate}
-      userName={firstName}
-      preference={preference}
-      avatarUrl={profile.avatarUrl}
-      hasPremium={hasPremium}
-      onLogout={onLogout}
-      onOpenAdmin={onOpenAdmin}
-    >
-      <Routes>
-        <Route index element={<Navigate to="feed" replace />} />
-        <Route path="feed" element={<FeedPage userName={firstName} userId={userId} hasPremium={hasPremium} onNavigate={(p) => navigate(`/dashboard/${p}`)} />} />
-        <Route path="calendar" element={<CalendarPage hasPremium={hasPremium} userId={userId} onNavigate={(p) => navigate(`/dashboard/${p}`)} />} />
-        <Route path="saved" element={<SavedPage userId={userId} />} />
-        <Route path="plans" element={<PlansPage />} />
-        <Route path="faq" element={<FaqPage />} />
-        <Route path="about" element={<AboutPage />} />
-        <Route path="profile" element={<ProfilePage profile={profile} onChange={setProfile} onSave={handleSaveProfile} />} />
-      </Routes>
-    </DashboardShell>
+    <FeedFilterProvider>
+      <DashboardShell
+        active={page}
+        onNavigate={handleNavigate}
+        userName={firstName}
+        preference={preference}
+        avatarUrl={profile.avatarUrl}
+        hasPremium={hasPremium}
+        onLogout={onLogout}
+        onOpenAdmin={onOpenAdmin}
+      >
+        <Routes>
+          <Route index element={<Navigate to="feed" replace />} />
+          <Route path="feed" element={<FeedPage userName={firstName} userId={userId} hasPremium={hasPremium} onNavigate={(p) => navigate(`/dashboard/${p}`)} />} />
+          <Route path="calendar" element={<CalendarPage hasPremium={hasPremium} userId={userId} onNavigate={(p) => navigate(`/dashboard/${p}`)} />} />
+          <Route path="saved" element={<SavedPage userId={userId} />} />
+          <Route path="plans" element={<PlansPage />} />
+          <Route path="faq" element={<FaqPage />} />
+          <Route path="about" element={<AboutPage />} />
+          <Route path="profile" element={<ProfilePage profile={profile} onChange={setProfile} onSave={handleSaveProfile} />} />
+        </Routes>
+      </DashboardShell>
+    </FeedFilterProvider>
   )
 }

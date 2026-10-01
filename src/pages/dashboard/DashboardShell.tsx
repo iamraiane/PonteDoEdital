@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import logoNome from '../../assets/logo-nome.png'
 import logoPonte from '../../assets/logo-ponte.png'
 import { DashIcon, DashAvatar } from './Icons'
+import { useFeedFilters, MONTH_LABELS, ESTADOS_UF } from './feedFilterStore'
 import './DashboardShell.css'
 
 export type PageKey = 'feed' | 'calendar' | 'saved' | 'plans' | 'faq' | 'about' | 'profile'
@@ -57,11 +58,17 @@ export default function DashboardShell({
   const [menuOpen, setMenuOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [statesExpanded, setStatesExpanded] = useState(false)
   const [unread, setUnread] = useState(NOTIFICATIONS.length)
   const [mounted, setMounted] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const notifRef = useRef<HTMLDivElement>(null)
   const moreRef = useRef<HTMLDivElement>(null)
+  const searchRef = useRef<HTMLDivElement>(null)
+
+  const { query, setQuery, months, states, counts, activeCount, toggleMonth, toggleState, clearFilters } =
+    useFeedFilters()
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true))
@@ -69,7 +76,7 @@ export default function DashboardShell({
   }, [])
 
   useEffect(() => {
-    if (!menuOpen && !notifOpen && !moreOpen) return
+    if (!menuOpen && !notifOpen && !moreOpen && !filtersOpen) return
     function onClickOutside(e: MouseEvent) {
       const target = e.target as Node
       if (menuOpen && menuRef.current && !menuRef.current.contains(target)) {
@@ -81,10 +88,22 @@ export default function DashboardShell({
       if (moreOpen && moreRef.current && !moreRef.current.contains(target)) {
         setMoreOpen(false)
       }
+      if (filtersOpen && searchRef.current && !searchRef.current.contains(target)) {
+        setFiltersOpen(false)
+      }
     }
     document.addEventListener('click', onClickOutside)
     return () => document.removeEventListener('click', onClickOutside)
-  }, [menuOpen, notifOpen, moreOpen])
+  }, [menuOpen, notifOpen, moreOpen, filtersOpen])
+
+  useEffect(() => {
+    if (!filtersOpen) return
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setFiltersOpen(false)
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [filtersOpen])
 
   function toggleNotif() {
     setNotifOpen((v) => {
@@ -93,21 +112,32 @@ export default function DashboardShell({
       return next
     })
     setMenuOpen(false)
+    setFiltersOpen(false)
   }
 
   function toggleMenu() {
     setMenuOpen((v) => !v)
     setNotifOpen(false)
+    setFiltersOpen(false)
+  }
+
+  function openFilters() {
+    setFiltersOpen(true)
+    setMenuOpen(false)
+    setNotifOpen(false)
+    setMoreOpen(false)
+    if (active !== 'feed') onNavigate('feed')
   }
 
   return (
     <div className={`pdd-shell ${mounted ? 'pdd-shell--mounted' : ''}`}>
       <div
-        className={`pdd-backdrop ${menuOpen || notifOpen || moreOpen ? 'is-visible' : ''}`}
+        className={`pdd-backdrop ${menuOpen || notifOpen || moreOpen || filtersOpen ? 'is-visible' : ''}`}
         onClick={() => {
           setMenuOpen(false)
           setNotifOpen(false)
           setMoreOpen(false)
+          setFiltersOpen(false)
         }}
         aria-hidden="true"
       />
@@ -118,10 +148,111 @@ export default function DashboardShell({
           <img src={logoNome} alt="Ponte do Edital" className="pdd-brand__logo" />
         </div>
 
-        <label className="pdd-search">
-          <span className="pdd-search__glyph"><DashIcon name="search" /></span>
-          <input type="text" placeholder="Buscar editais, órgãos, categorias..." />
-        </label>
+        <div className="pdd-search-wrap" ref={searchRef}>
+          <label
+            className="pdd-search"
+            onClick={() => {
+              if (!hasPremium) onNavigate('plans')
+            }}
+          >
+            <span className="pdd-search__glyph"><DashIcon name="search" /></span>
+            <input
+              type="text"
+              placeholder={hasPremium ? 'Buscar editais, prazos, estados...' : 'Busca somente para premium...'}
+              value={hasPremium ? query : ''}
+              readOnly={!hasPremium}
+              onChange={(e) => hasPremium && setQuery(e.target.value)}
+              onFocus={() => (hasPremium ? openFilters() : onNavigate('plans'))}
+              aria-label="Buscar editais por título"
+            />
+            {hasPremium && activeCount > 0 && <span className="pdd-search__badge">{activeCount}</span>}
+            {!hasPremium && (
+              <span className="pdd-search__trophy"><DashIcon name="trophy" /></span>
+            )}
+          </label>
+
+          <div
+            className={`pdd-filter-panel ${filtersOpen ? 'is-open' : ''}`}
+            role="dialog"
+            aria-label="Filtros do feed"
+          >
+            <div className="pdd-filter-panel__head">
+              <p className="pdd-filter-panel__title">Filtrar editais</p>
+              <button
+                type="button"
+                className="pdd-filter-panel__close"
+                aria-label="Fechar filtros"
+                onClick={() => setFiltersOpen(false)}
+              >
+                <DashIcon name="close" />
+              </button>
+            </div>
+
+            <section className="pdd-filter-panel__section">
+              <h3 className="pdd-filter-panel__section-title">Prazo (mês)</h3>
+              <ul className="pdd-filter-panel__list">
+                {MONTH_LABELS.map((label, index) => {
+                  const month = index + 1
+                  return (
+                    <li key={label}>
+                      <label className="pdd-filter-option">
+                        <input
+                          type="checkbox"
+                          checked={months.includes(month)}
+                          onChange={() => toggleMonth(month)}
+                        />
+                        <span className="pdd-filter-option__label">
+                          {label} <span className="pdd-filter-option__count">({counts.months[month] ?? 0})</span>
+                        </span>
+                      </label>
+                    </li>
+                  )
+                })}
+              </ul>
+            </section>
+
+            <section className="pdd-filter-panel__section">
+              <h3 className="pdd-filter-panel__section-title">Estado</h3>
+              <ul className="pdd-filter-panel__list">
+                {(statesExpanded ? ESTADOS_UF : ESTADOS_UF.slice(0, 8)).map((uf) => (
+                  <li key={uf}>
+                    <label className="pdd-filter-option">
+                      <input
+                        type="checkbox"
+                        checked={states.includes(uf)}
+                        onChange={() => toggleState(uf)}
+                      />
+                      <span className="pdd-filter-option__label">
+                        {uf} <span className="pdd-filter-option__count">({counts.states[uf] ?? 0})</span>
+                      </span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                className="pdd-filter-more"
+                onClick={() => setStatesExpanded((v) => !v)}
+              >
+                {statesExpanded ? 'Ver menos' : 'Ver mais'}
+              </button>
+            </section>
+
+            <div className="pdd-filter-panel__footer">
+              <span className="pdd-filter-panel__summary">
+                {activeCount === 0 ? 'Nenhum filtro ativo' : `${activeCount} filtro${activeCount > 1 ? 's' : ''} ativo${activeCount > 1 ? 's' : ''}`}
+              </span>
+              <button
+                type="button"
+                className="pdd-filter-clear"
+                disabled={activeCount === 0}
+                onClick={clearFilters}
+              >
+                Limpar filtros
+              </button>
+            </div>
+          </div>
+        </div>
 
         <div className="pdd-header__actions">
           <div className="pdd-notif-wrap" ref={notifRef}>
@@ -217,7 +348,10 @@ export default function DashboardShell({
                 key={item.key}
                 type="button"
                 className={`pdd-nav__item ${active === item.key ? 'is-active' : ''}`}
-                onClick={() => onNavigate(item.key)}
+                onClick={() => {
+                  setFiltersOpen(false)
+                  onNavigate(item.key)
+                }}
               >
                 <span className="pdd-nav__icon"><DashIcon name={item.icon} /></span>
                 {item.label}
@@ -231,7 +365,7 @@ export default function DashboardShell({
           <div className="pdd-pref-card">
             <p className="pdd-pref-card__title">Suas preferências</p>
             <p className="pdd-pref-card__value">{preference || 'Nenhuma preferência definida'}</p>
-            <button type="button" className="pdd-pref-card__cta" onClick={() => onNavigate('profile')}>
+            <button type="button" className="pdd-pref-card__cta" onClick={() => { setFiltersOpen(false); onNavigate('profile') }}>
               Ajustar preferências
             </button>
           </div>
@@ -252,6 +386,7 @@ export default function DashboardShell({
             className={`pdd-tabbar__item ${active === item.key ? 'is-active' : ''}`}
             onClick={() => {
               setMoreOpen(false)
+              setFiltersOpen(false)
               onNavigate(item.key)
             }}
           >
@@ -281,6 +416,7 @@ export default function DashboardShell({
                 className={`pdd-tabbar__sheet-item ${active === item.key ? 'is-active' : ''}`}
                 onClick={() => {
                   setMoreOpen(false)
+                  setFiltersOpen(false)
                   onNavigate(item.key)
                 }}
               >
@@ -294,6 +430,7 @@ export default function DashboardShell({
               className="pdd-tabbar__sheet-item"
               onClick={() => {
                 setMoreOpen(false)
+                setFiltersOpen(false)
                 onNavigate('profile')
               }}
             >

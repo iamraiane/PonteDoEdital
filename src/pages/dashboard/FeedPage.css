@@ -17,33 +17,40 @@
 .pdd-filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.55rem;
+  align-items: center;
+  gap: 0.75rem;
   margin-bottom: 1.4rem;
 }
 
-.pdd-pill {
+.pdd-filters__hint {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.pdd-filters__clear {
   border: 1.5px solid rgba(15, 155, 142, 0.3);
   background: var(--card);
-  color: var(--muted);
+  color: var(--teal);
   border-radius: 999px;
-  padding: 0.5rem 1.05rem;
-  font-size: 0.85rem;
+  padding: 0.4rem 1rem;
+  font-size: 0.82rem;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease;
 }
 
-.pdd-pill:hover {
+.pdd-filters__clear:hover {
   transform: translateY(-1px);
   border-color: var(--teal);
-  color: var(--teal);
+  background: var(--teal-soft);
 }
 
-.pdd-pill.is-active {
-  background: var(--navy);
-  border-color: var(--navy);
-  color: #fff;
+.pdd-feed-empty {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 0.95rem;
 }
 
 .pdd-edital-list {
@@ -426,11 +433,6 @@
 @media (max-width: 390px) {
   .pdd-greeting {
     font-size: 1.3rem;
-  }
-
-  .pdd-pill {
-    padding: 0.4rem 0.85rem;
-    font-size: 0.8rem;
   }
 
   .pdd-edital-card {

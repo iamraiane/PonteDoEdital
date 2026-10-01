@@ -4,12 +4,7 @@ import { DashIcon, DashAvatar } from './Icons'
 import './FeedPage.css'
 import { getNotices, type NoticeApi } from '../../services/notice'
 import { getFavorites, addFavorite, removeFavorite } from '../../services/favorite'
-
-const ESTADOS = [
-  'Todos', 'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
-  'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS',
-  'RO', 'RR', 'SC', 'SP', 'SE', 'TO',
-]
+import { useFeedFilters } from './feedFilterStore'
 
 type Edital = {
   id: string
@@ -21,6 +16,7 @@ type Edital = {
   titulo: string
   descricao: string
   prazo: string
+  mes: number | null
   link: string
 }
 
@@ -50,6 +46,18 @@ function formatDate(dateStr: string | null): string {
   return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
+function monthFromDate(dateStr: string | null): number | null {
+  if (!dateStr) return null
+  const iso = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr)
+  if (iso) return Number(iso[2])
+  const date = new Date(dateStr)
+  return Number.isNaN(date.getTime()) ? null : date.getMonth() + 1
+}
+
+function normalizeText(value: string): string {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+}
+
 function mapNoticeToEdital(n: NoticeApi): Edital {
   return {
     id: String(n.id),
@@ -61,12 +69,26 @@ function mapNoticeToEdital(n: NoticeApi): Edital {
     titulo: n.description?.split('\n')[0]?.substring(0, 80) ?? n.title,
     descricao: n.description ?? '',
     prazo: formatDate(n.publication_date),
+    mes: monthFromDate(n.publication_date),
     link: n.link,
   }
 }
 
+function matchesQuery(e: Edital, queryNorm: string): boolean {
+  if (!queryNorm) return true
+  return normalizeText(e.orgao).includes(queryNorm) || normalizeText(e.titulo).includes(queryNorm)
+}
+
+function matchesMonths(e: Edital, months: number[]): boolean {
+  return months.length === 0 || (e.mes !== null && months.includes(e.mes))
+}
+
+function matchesStates(e: Edital, states: string[]): boolean {
+  return states.length === 0 || states.includes(e.tag)
+}
+
 export default function FeedPage({ userName, userId, hasPremium = false, onNavigate }: { userName: string; userId?: number; hasPremium?: boolean; onNavigate?: (page: string) => void }) {
-  const [estado, setEstado] = useState('Todos')
+  const { query, months, states, setCounts, activeCount, clearFilters } = useFeedFilters()
   const [salvos, setSalvos] = useState<Record<string, boolean>>({})
   const [agendados, setAgendados] = useState<Record<string, boolean>>({})
   const [editais, setEditais] = useState<Edital[]>([])
@@ -114,8 +136,25 @@ export default function FeedPage({ userName, userId, hasPremium = false, onNavig
     setAgendados((s) => ({ ...s, [id]: true }))
   }
 
-  const filteredEditais =
-    estado === 'Todos' ? editais : editais.filter((e) => e.tag === estado)
+  const queryNorm = normalizeText(query.trim())
+  const filteredEditais = editais.filter(
+    (e) => matchesQuery(e, queryNorm) && matchesMonths(e, months) && matchesStates(e, states),
+  )
+
+  useEffect(() => {
+    const monthCounts: Record<number, number> = {}
+    const stateCounts: Record<string, number> = {}
+    const norm = normalizeText(query.trim())
+    for (const e of editais) {
+      if (matchesQuery(e, norm) && matchesStates(e, states) && e.mes !== null) {
+        monthCounts[e.mes] = (monthCounts[e.mes] ?? 0) + 1
+      }
+      if (matchesQuery(e, norm) && matchesMonths(e, months) && e.tag) {
+        stateCounts[e.tag] = (stateCounts[e.tag] ?? 0) + 1
+      }
+    }
+    setCounts({ months: monthCounts, states: stateCounts })
+  }, [editais, query, months, states, setCounts])
 
   return (
     <div className="pdd-feed">
@@ -124,16 +163,16 @@ export default function FeedPage({ userName, userId, hasPremium = false, onNavig
       </h1>
 
       <div className="pdd-filters">
-        {ESTADOS.map((e) => (
-          <button
-            key={e}
-            type="button"
-            className={`pdd-pill ${estado === e ? 'is-active' : ''}`}
-            onClick={() => setEstado(e)}
-          >
-            {e}
+        <span className="pdd-filters__hint">
+          {activeCount === 0
+            ? ''
+            : `${activeCount} filtro${activeCount > 1 ? 's' : ''} ativo${activeCount > 1 ? 's' : ''}`}
+        </span>
+        {activeCount > 0 && (
+          <button type="button" className="pdd-filters__clear" onClick={clearFilters}>
+            Limpar filtros
           </button>
-        ))}
+        )}
       </div>
 
       {loading && <p>Carregando editais...</p>}
@@ -143,7 +182,13 @@ export default function FeedPage({ userName, userId, hasPremium = false, onNavig
       )}
 
       <div className="pdd-edital-list">
-        {!loading && filteredEditais.length === 0 && <p>Nenhum edital encontrado.</p>}
+        {!loading && filteredEditais.length === 0 && (
+          <p className="pdd-feed-empty">
+            {activeCount > 0
+              ? 'Nenhum edital encontrado com esses filtros.'
+              : 'Nenhum edital encontrado.'}
+          </p>
+        )}
         {filteredEditais.map((e, i) => (
           <article
             key={e.id}
