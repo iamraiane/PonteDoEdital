@@ -4,6 +4,7 @@ import { DashIcon, DashAvatar } from './Icons'
 import './FeedPage.css'
 import { getNotices, type NoticeApi } from '../../services/notice'
 import { getFavorites, addFavorite, removeFavorite } from '../../services/favorite'
+import { prewarmGoogleToken, insertGoogleEvent, deleteGoogleEvent } from '../../services/googleCalendar'
 import { useFeedFilters } from './feedFilterStore'
 
 type Edital = {
@@ -16,6 +17,7 @@ type Edital = {
   titulo: string
   descricao: string
   prazo: string
+  dataPrazo: string | null
   mes: number | null
   link: string
 }
@@ -69,6 +71,7 @@ function mapNoticeToEdital(n: NoticeApi): Edital {
     titulo: n.description?.split('\n')[0]?.substring(0, 80) ?? n.title,
     descricao: n.description ?? '',
     prazo: formatDate(n.publication_date),
+    dataPrazo: n.publication_date,
     mes: monthFromDate(n.publication_date),
     link: n.link,
   }
@@ -121,15 +124,33 @@ export default function FeedPage({ userName, userId, hasPremium = false, userAct
     setSalvos((s) => ({ ...s, [id]: !isSaved }))
     setFavoriteError(null)
 
+    if (!isSaved) prewarmGoogleToken()
+
     const action = isSaved ? removeFavorite(noticeId) : addFavorite(noticeId)
-    action.catch((err) => {
-      setSalvos((s) => ({ ...s, [id]: isSaved }))
-      if (err.message.includes('limit') || err.message.includes('5')) {
-        setShowLimitModal(true)
-      } else {
-        setFavoriteError(err.message || 'Erro ao salvar edital')
-      }
-    })
+    action
+      .then(() => {
+        const edital = editais.find((item) => item.id === id)
+        if (!edital) return
+        if (isSaved) {
+          void deleteGoogleEvent(noticeId)
+        } else if (edital.dataPrazo) {
+          void insertGoogleEvent({
+            noticeId,
+            title: edital.orgao,
+            description: edital.descricao,
+            url: edital.link,
+            date: edital.dataPrazo,
+          })
+        }
+      })
+      .catch((err) => {
+        setSalvos((s) => ({ ...s, [id]: isSaved }))
+        if (err.message.includes('limit') || err.message.includes('5')) {
+          setShowLimitModal(true)
+        } else {
+          setFavoriteError(err.message || 'Erro ao salvar edital')
+        }
+      })
   }
 
   function agendar(id: string) {
