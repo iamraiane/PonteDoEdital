@@ -613,3 +613,11 @@
 .pdd-limit-modal__btn--primary:hover {
   background: #0d8a7e;
 }
+
+/* ---------- conta desativada: ações bloqueadas ---------- */
+
+.pdd-btn-outline:disabled,
+.pdd-bookmark-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

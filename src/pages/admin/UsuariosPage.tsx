@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DashIcon } from '../dashboard/Icons'
-import { getAllUsers, promoteToAdmin, demoteToUser, getTokenPayload } from '../../services/user'
+import { getAllUsers, promoteToAdmin, demoteToUser, promoteToPremium, disableUser, activateUser, getTokenPayload } from '../../services/user'
 import type { UserData } from '../../services/user'
 import './EditaisPage.css'
 import './UsuariosPage.css'
@@ -49,21 +49,42 @@ export default function UsuariosPage() {
     setTimeout(() => setToast(null), 2200)
   }
 
-  async function salvarStatus(id: number, isAdmin: boolean) {
+  async function salvarStatus(id: number, isAdmin: boolean, isPremium: boolean, ativo: boolean) {
     try {
+      const original = usuarios.find((u) => u.id === id)
+      if (!ativo && id === currentUserId) {
+        avisar('Você não pode desativar sua própria conta')
+        return
+      }
+      let role: string
       if (isAdmin) {
         await promoteToAdmin(id)
+        role = 'admin'
         avisar('Usuário promovido a admin')
+      } else if (isPremium) {
+        await promoteToPremium(id)
+        role = 'premium'
+        avisar('Usuário promovido a premium')
       } else {
         await demoteToUser(id)
+        role = 'user'
         if (id === currentUserId) {
           navigate('/dashboard')
           return
         }
-        avisar('Usuário removido de admin')
+        avisar('Permissão removida')
+      }
+      if (ativo !== (original?.active !== false)) {
+        if (ativo) {
+          await activateUser(id)
+          avisar('Usuário reativado')
+        } else {
+          await disableUser(id)
+          avisar('Usuário desativado')
+        }
       }
       setUsuarios((prev) =>
-        prev.map((u) => (u.id === id ? { ...u, role: isAdmin ? 'admin' : 'user' } : u))
+        prev.map((u) => (u.id === id ? { ...u, role, active: ativo } : u))
       )
       setEditando(null)
     } catch (err) {
@@ -147,8 +168,8 @@ export default function UsuariosPage() {
                 </td>
                 <td data-label="E-mail">{u.email}</td>
                 <td data-label="Status">
-                  <span className={`pda-badge pda-badge--${u.role === 'admin' ? 'admin' : u.role === 'premium' ? 'premium' : 'ativo'}`}>
-                    {getRoleLabel(u.role)}
+                  <span className={`pda-badge pda-badge--${u.active === false ? 'inativo' : u.role === 'admin' ? 'admin' : u.role === 'premium' ? 'premium' : 'ativo'}`}>
+                    {u.active === false ? 'Desativado' : getRoleLabel(u.role)}
                   </span>
                 </td>
                 <td className="pda-actions-cell pda-actions-cell--single" data-label="Ações">
@@ -182,9 +203,18 @@ function EditarStatusModal({
 }: {
   usuario: UserData
   onCancel: () => void
-  onSave: (id: number, isAdmin: boolean) => void
+  onSave: (id: number, isAdmin: boolean, isPremium: boolean, ativo: boolean) => void
 }) {
   const [isAdmin, setIsAdmin] = useState(usuario.role === 'admin')
+  const [isPremium, setIsPremium] = useState(usuario.role === 'premium')
+  const [ativo, setAtivo] = useState(usuario.active !== false)
+  const isSelf = usuario.id === getTokenPayload()?.id
+
+  function toggleAdmin() {
+    const next = !isAdmin
+    setIsAdmin(next)
+    if (next) setIsPremium(false)
+  }
 
   return (
     <div className="pda-overlay" onClick={onCancel}>
@@ -201,19 +231,41 @@ function EditarStatusModal({
             type="button"
             className={`pda-switch ${isAdmin ? 'is-on' : ''}`}
             aria-pressed={isAdmin}
-            onClick={() => setIsAdmin((v) => !v)}
+            onClick={toggleAdmin}
           >
             <span className="pda-switch__knob" />
           </button>
         </div>
 
-        <div className="pda-status-row" style={{ opacity: 0.5, cursor: 'not-allowed' }}>
-          Desabilitar usuário
+        <div
+          className="pda-status-row"
+          style={isAdmin ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
+        >
+          Habilitar para Premium
           <button
             type="button"
-            className="pda-switch"
-            disabled
-            title="Em breve"
+            className={`pda-switch ${isPremium ? 'is-on' : ''}`}
+            aria-pressed={isPremium}
+            disabled={isAdmin}
+            title={isAdmin ? 'Admin já possui acesso premium' : 'Habilitar premium'}
+            onClick={() => setIsPremium((v) => !v)}
+          >
+            <span className="pda-switch__knob" />
+          </button>
+        </div>
+
+        <div
+          className="pda-status-row"
+          style={isSelf ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
+        >
+          Habilitar usuário
+          <button
+            type="button"
+            className={`pda-switch ${ativo ? 'is-on' : ''}`}
+            aria-pressed={ativo}
+            disabled={isSelf}
+            title={isSelf ? 'Você não pode desativar sua própria conta' : 'Conta ativa'}
+            onClick={() => setAtivo((v) => !v)}
           >
             <span className="pda-switch__knob" />
           </button>
@@ -223,7 +275,7 @@ function EditarStatusModal({
           type="button"
           className="pda-btn pda-btn--teal"
           style={{ marginTop: '1.1rem' }}
-          onClick={() => onSave(usuario.id, isAdmin)}
+          onClick={() => onSave(usuario.id, isAdmin, isPremium, ativo)}
         >
           Salvar
         </button>

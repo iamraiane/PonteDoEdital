@@ -38,6 +38,7 @@ function App() {
   const [userName, setUserName] = useState('')
   const [userId, setUserId] = useState<number | undefined>()
   const [userRole, setUserRole] = useState<string>('')
+  const [userActive, setUserActive] = useState(true)
   const [checking, setChecking] = useState(true)
 
   useEffect(() => {
@@ -69,6 +70,7 @@ function App() {
         setUserName(user.name)
         setUserId(user.id)
         setUserRole(user.role)
+        setUserActive(user.active !== false)
       })
       .catch(() => {
         localStorage.removeItem('token')
@@ -105,8 +107,9 @@ function App() {
                 userName={userName}
                 userId={userId}
                 userRole={userRole}
+                userActive={userActive}
                 onLogout={handleLogout}
-                onOpenAdmin={userRole === 'admin' ? () => window.location.href = '/admin' : undefined}
+                onOpenAdmin={userRole === 'admin' && userActive ? () => window.location.href = '/admin' : undefined}
               />
             </ProtectedRoute>
           }
@@ -114,12 +117,16 @@ function App() {
         <Route
           path="/admin/*"
           element={
-            <ProtectedRoute>
-              <AdminApp
-                onExitAdmin={() => window.location.href = '/dashboard'}
-                onLogout={handleLogout}
-              />
-            </ProtectedRoute>
+            userActive ? (
+              <ProtectedRoute>
+                <AdminApp
+                  onExitAdmin={() => window.location.href = '/dashboard'}
+                  onLogout={handleLogout}
+                />
+              </ProtectedRoute>
+            ) : (
+              <Navigate to="/dashboard" replace />
+            )
           }
         />
         <Route path="*" element={<Navigate to="/login" replace />} />

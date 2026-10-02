@@ -87,7 +87,7 @@ function matchesStates(e: Edital, states: string[]): boolean {
   return states.length === 0 || states.includes(e.tag)
 }
 
-export default function FeedPage({ userName, userId, hasPremium = false, onNavigate }: { userName: string; userId?: number; hasPremium?: boolean; onNavigate?: (page: string) => void }) {
+export default function FeedPage({ userName, userId, hasPremium = false, userActive = true, onNavigate }: { userName: string; userId?: number; hasPremium?: boolean; userActive?: boolean; onNavigate?: (page: string) => void }) {
   const { query, months, states, setCounts, activeCount, clearFilters } = useFeedFilters()
   const [salvos, setSalvos] = useState<Record<string, boolean>>({})
   const [agendados, setAgendados] = useState<Record<string, boolean>>({})
@@ -221,6 +221,8 @@ export default function FeedPage({ userName, userId, hasPremium = false, onNavig
               <button
                 type="button"
                 className={`pdd-btn-outline ${agendados[e.id] ? 'is-done' : ''}`}
+                disabled={!userActive}
+                title={userActive ? undefined : 'Conta desativada'}
                 onClick={() => hasPremium ? agendar(e.id) : onNavigate?.('plans')}
               >
                 <DashIcon name="schedule" />
@@ -230,6 +232,8 @@ export default function FeedPage({ userName, userId, hasPremium = false, onNavig
               <button
                 type="button"
                 className={`pdd-bookmark-btn ${salvos[e.id] ? 'is-active' : ''}`}
+                disabled={!userActive}
+                title={userActive ? undefined : 'Conta desativada'}
                 onClick={() => toggleSalvo(e.id)}
                 aria-label={salvos[e.id] ? 'Remover dos salvos' : 'Salvar edital'}
               >

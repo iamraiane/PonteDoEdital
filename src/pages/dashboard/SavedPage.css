@@ -201,3 +201,10 @@
     font-size: 0.7rem;
   }
 }
+
+/* ---------- conta desativada: ações bloqueadas ---------- */
+
+.pdd-remove-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

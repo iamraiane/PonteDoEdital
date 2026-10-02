@@ -35,12 +35,14 @@ export default function DashboardApp({
   userName = 'Raiane',
   userId,
   userRole,
+  userActive = true,
   onLogout,
   onOpenAdmin,
 }: {
   userName?: string
   userId?: number
   userRole?: string
+  userActive?: boolean
   onLogout?: () => void
   onOpenAdmin?: () => void
 }) {
@@ -106,18 +108,19 @@ export default function DashboardApp({
         preference={preference}
         avatarUrl={profile.avatarUrl}
         hasPremium={hasPremium}
+        userActive={userActive}
         onLogout={onLogout}
         onOpenAdmin={onOpenAdmin}
       >
         <Routes>
           <Route index element={<Navigate to="feed" replace />} />
-          <Route path="feed" element={<FeedPage userName={firstName} userId={userId} hasPremium={hasPremium} onNavigate={(p) => navigate(`/dashboard/${p}`)} />} />
+          <Route path="feed" element={<FeedPage userName={firstName} userId={userId} hasPremium={hasPremium} userActive={userActive} onNavigate={(p) => navigate(`/dashboard/${p}`)} />} />
           <Route path="calendar" element={<CalendarPage hasPremium={hasPremium} userId={userId} onNavigate={(p) => navigate(`/dashboard/${p}`)} />} />
-          <Route path="saved" element={<SavedPage userId={userId} />} />
+          <Route path="saved" element={<SavedPage userId={userId} userActive={userActive} />} />
           <Route path="plans" element={<PlansPage />} />
           <Route path="faq" element={<FaqPage />} />
           <Route path="about" element={<AboutPage />} />
-          <Route path="profile" element={<ProfilePage profile={profile} onChange={setProfile} onSave={handleSaveProfile} />} />
+          <Route path="profile" element={<ProfilePage profile={profile} onChange={setProfile} onSave={handleSaveProfile} userActive={userActive} />} />
         </Routes>
       </DashboardShell>
     </FeedFilterProvider>

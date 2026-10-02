@@ -41,6 +41,7 @@ export default function DashboardShell({
   preference,
   avatarUrl,
   hasPremium,
+  userActive = true,
   onLogout,
   onOpenAdmin,
   children,
@@ -51,6 +52,7 @@ export default function DashboardShell({
   preference?: string
   avatarUrl?: string | null
   hasPremium?: boolean
+  userActive?: boolean
   onLogout?: () => void
   onOpenAdmin?: () => void
   children: ReactNode
@@ -339,6 +341,14 @@ export default function DashboardShell({
           </div>
         </div>
       </header>
+
+      {!userActive && (
+        <div className="pdd-account-disabled" role="status">
+          <span>
+            Sua conta está desativada. Você pode navegar pelo site, mas não pode realizar ações.
+          </span>
+        </div>
+      )}
 
       <div className="pdd-body">
         <aside className="pdd-sidebar">

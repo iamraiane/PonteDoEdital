@@ -52,10 +52,12 @@ export default function ProfilePage({
   profile,
   onChange,
   onSave,
+  userActive = true,
 }: {
   profile: ProfileData
   onChange: (next: ProfileData) => void
   onSave: () => Promise<void>
+  userActive?: boolean
 }) {
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -223,7 +225,8 @@ export default function ProfilePage({
           type="button"
           className="pdd-profile-save"
           onClick={handleSave}
-          disabled={saving}
+          disabled={saving || !userActive}
+          title={userActive ? undefined : 'Conta desativada'}
         >
           {saving ? (
             'Salvando...'

@@ -9,7 +9,7 @@ function formatDate(dateStr: string | null): string {
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
-export default function SavedPage({ userId }: { userId?: number }) {
+export default function SavedPage({ userId, userActive = true }: { userId?: number; userActive?: boolean }) {
   const [items, setItems] = useState<Favorite[]>([])
   const [loading, setLoading] = useState(true)
   const [removing, setRemoving] = useState<string | null>(null)
@@ -66,7 +66,13 @@ export default function SavedPage({ userId }: { userId?: number }) {
                 <a href={n.link} target="_blank" rel="noopener noreferrer" className="pdd-status-btn">
                   <DashIcon name="arrow" /> Ver detalhes
                 </a>
-                <button type="button" className="pdd-remove-btn" onClick={() => remove(String(fav.notice_id))}>
+                <button
+                  type="button"
+                  className="pdd-remove-btn"
+                  disabled={!userActive}
+                  title={userActive ? undefined : 'Conta desativada'}
+                  onClick={() => remove(String(fav.notice_id))}
+                >
                   <DashIcon name="trash" /> Remover
                 </button>
               </div>

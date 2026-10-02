@@ -51,6 +51,7 @@ export type UserData = {
   state_code: string
   preferences: string[]
   role: string
+  active: boolean
 }
 
 export type SubscriptionData = {
@@ -130,9 +131,21 @@ export async function getAllUsers(): Promise<UserData[]> {
 }
 
 export async function promoteToAdmin(id: number): Promise<{ message: string }> {
-  return authRequest<{ message: string }>(`users/${id}/promote`, { method: 'PATCH' })
+  return authRequest<{ message: string }>(`users/${id}/promoteToAdmin`, { method: 'PATCH' })
 }
 
 export async function demoteToUser(id: number): Promise<{ message: string }> {
-  return authRequest<{ message: string }>(`users/${id}/demote`, { method: 'PATCH' })
+  return authRequest<{ message: string }>(`users/${id}/demoteToUser`, { method: 'PATCH' })
+}
+
+export async function promoteToPremium(id: number): Promise<{ message: string }> {
+  return authRequest<{ message: string }>(`users/${id}/promoteToPremium`, { method: 'PATCH' })
+}
+
+export async function disableUser(id: number): Promise<{ message: string }> {
+  return authRequest<{ message: string }>(`users/${id}/disable`, { method: 'PATCH' })
+}
+
+export async function activateUser(id: number): Promise<{ message: string }> {
+  return authRequest<{ message: string }>(`users/${id}/activate`, { method: 'PATCH' })
 }

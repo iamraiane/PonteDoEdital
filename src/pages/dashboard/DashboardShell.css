@@ -572,6 +572,24 @@ html, body {
   color: var(--teal);
 }
 
+/* ---------- tarja de conta desativada ---------- */
+
+.pdd-account-disabled {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.4rem;
+  background: #fff3d6;
+  border-bottom: 1px solid rgba(160, 110, 0, 0.35);
+  color: #7a5200;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+}
+
 /* ---------- corpo (sidebar + conteúdo) ---------- */
 
 .pdd-body {
