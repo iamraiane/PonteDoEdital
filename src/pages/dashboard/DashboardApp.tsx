@@ -31,6 +31,19 @@ const KEY_TO_ROUTE: Record<PageKey, string> = {
   profile: '/dashboard/profile',
 }
 
+function profilesEqual(a: ProfileData, b: ProfileData): boolean {
+  return (
+    a.nome === b.nome &&
+    a.email === b.email &&
+    a.cpf === b.cpf &&
+    a.dataNascimento === b.dataNascimento &&
+    a.estado === b.estado &&
+    a.avatarUrl === b.avatarUrl &&
+    a.interesses.length === b.interesses.length &&
+    a.interesses.every((item, i) => item === b.interesses[i])
+  )
+}
+
 export default function DashboardApp({
   userName = 'Raiane',
   userId,
@@ -58,12 +71,15 @@ export default function DashboardApp({
     interesses: [],
     avatarUrl: null,
   })
+  const [savedProfile, setSavedProfile] = useState<ProfileData>(profile)
+  const [unsavedOpen, setUnsavedOpen] = useState(false)
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null)
 
   useEffect(() => {
     if (!userId) return
     getUserById(userId)
       .then((data) => {
-        setProfile({
+        const loaded: ProfileData = {
           nome: data.name || '',
           email: data.email || '',
           cpf: data.cpf || '',
@@ -71,13 +87,16 @@ export default function DashboardApp({
           estado: data.state_code || '',
           interesses: data.preferences || [],
           avatarUrl: null,
-        })
+        }
+        setProfile(loaded)
+        setSavedProfile(loaded)
       })
       .catch(console.error)
   }, [userId])
 
   const pathSegment = location.pathname.split('/')[2] || 'feed'
   const page: PageKey = ROUTE_MAP[pathSegment] || 'feed'
+  const isDirty = page === 'profile' && !profilesEqual(profile, savedProfile)
 
   useEffect(() => {
     setHasPremium(userRole === 'premium' || userRole === 'admin')
@@ -85,16 +104,67 @@ export default function DashboardApp({
 
   async function handleSaveProfile() {
     if (!userId) return
+    const snapshot = profile
     await updateUser(userId, {
-      name: profile.nome,
-      state_code: profile.estado,
-      preferences: profile.interesses,
+      name: snapshot.nome,
+      state_code: snapshot.estado,
+      preferences: snapshot.interesses,
     })
+    setSavedProfile(snapshot)
+  }
+
+  function runGuarded(action: () => void) {
+    if (isDirty) {
+      setPendingAction(() => action)
+      setUnsavedOpen(true)
+      return
+    }
+    action()
   }
 
   function handleNavigate(key: PageKey) {
-    navigate(KEY_TO_ROUTE[key])
+    if (key === page) return
+    runGuarded(() => navigate(KEY_TO_ROUTE[key]))
   }
+
+  function handleLogout() {
+    if (onLogout) runGuarded(onLogout)
+  }
+
+  function handleKeepEditing() {
+    setUnsavedOpen(false)
+    setPendingAction(null)
+  }
+
+  function handleDiscardChanges() {
+    setProfile(savedProfile)
+    setUnsavedOpen(false)
+    const action = pendingAction
+    setPendingAction(null)
+    action?.()
+  }
+
+  useEffect(() => {
+    if (!isDirty) return
+    function onBeforeUnload(e: BeforeUnloadEvent) {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [isDirty])
+
+  useEffect(() => {
+    if (!unsavedOpen) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setUnsavedOpen(false)
+        setPendingAction(null)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [unsavedOpen])
 
   const firstName = profile.nome.trim().split(' ')[0] || userName
   const preference = profile.interesses.length > 0 ? profile.interesses.join(' & ') : undefined
@@ -109,7 +179,7 @@ export default function DashboardApp({
         avatarUrl={profile.avatarUrl}
         hasPremium={hasPremium}
         userActive={userActive}
-        onLogout={onLogout}
+        onLogout={handleLogout}
         onOpenAdmin={onOpenAdmin}
       >
         <Routes>
@@ -123,6 +193,44 @@ export default function DashboardApp({
           <Route path="profile" element={<ProfilePage profile={profile} onChange={setProfile} onSave={handleSaveProfile} userActive={userActive} />} />
         </Routes>
       </DashboardShell>
+
+      <div
+        className={`pdd-unsaved-overlay ${unsavedOpen ? 'is-open' : ''}`}
+        onClick={handleKeepEditing}
+        role="presentation"
+      >
+        <div
+          className={`pdd-unsaved-modal ${unsavedOpen ? 'is-open' : ''}`}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="pdd-unsaved-title"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h2 className="pdd-unsaved-title" id="pdd-unsaved-title">
+            Alterações não salvas
+          </h2>
+          <p className="pdd-unsaved-text">
+            Você tem alterações na sua página de perfil que ainda não foram salvas. O que
+            deseja fazer?
+          </p>
+          <div className="pdd-unsaved-actions">
+            <button
+              type="button"
+              className="pdd-unsaved-btn pdd-unsaved-btn--secondary"
+              onClick={handleKeepEditing}
+            >
+              Continuar editando
+            </button>
+            <button
+              type="button"
+              className="pdd-unsaved-btn pdd-unsaved-btn--danger"
+              onClick={handleDiscardChanges}
+            >
+              Descartar alterações
+            </button>
+          </div>
+        </div>
+      </div>
     </FeedFilterProvider>
   )
 }

@@ -28,6 +28,7 @@ type GisGlobal = {
   accounts?: {
     oauth2?: {
       initTokenClient: (cfg: TokenClientConfig) => TokenClient
+      revoke?: (token: string, done?: () => void) => void
     }
   }
 }
@@ -261,4 +262,50 @@ export async function deleteGoogleEvent(noticeId: number): Promise<void> {
   } catch {
     // mantém o id para uma futura tentativa; falha silenciosa
   }
+}
+
+export async function disconnectGoogleCalendar(): Promise<{ removed: number; kept: number }> {
+  const map = readEventMap()
+  const ids = Object.keys(map)
+  let removed = 0
+  let kept = 0
+
+  if (ids.length > 0) {
+    const cached = accessToken && Date.now() < expiresAt ? accessToken : null
+    const token = cached ?? (await acquireToken('silent'))
+    if (token) {
+      for (const noticeId of ids) {
+        try {
+          const res = await fetch(
+            `${API_BASE}/calendars/primary/events/${encodeURIComponent(map[noticeId])}`,
+            { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } },
+          )
+          if (res.ok || res.status === 404) {
+            delete map[noticeId]
+            removed += 1
+          } else {
+            kept += 1
+          }
+        } catch {
+          // sem conexão: mantém o id para uma futura tentativa
+          kept += 1
+        }
+      }
+      writeEventMap(map)
+    } else {
+      kept = ids.length
+    }
+  }
+
+  if (accessToken) {
+    try {
+      gis()?.accounts?.oauth2?.revoke?.(accessToken, () => {})
+    } catch {
+      // revogação é melhor esforço; não bloqueia a desconexão
+    }
+  }
+  accessToken = null
+  expiresAt = 0
+  writeStatus('skipped')
+  return { removed, kept }
 }

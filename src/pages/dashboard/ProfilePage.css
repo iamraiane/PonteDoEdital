@@ -1,5 +1,6 @@
 .pdd-profile-page {
   max-width: 46rem;
+  padding-bottom: 1.5rem;
 }
 
 .pdd-profile-sub {
@@ -202,6 +203,7 @@
 .pdd-profile-save-row {
   display: flex;
   justify-content: flex-end;
+  margin-bottom: 1.5rem;
 }
 
 .pdd-profile-save {
@@ -305,4 +307,229 @@
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+/* ---------- seção Permissões (Google Agenda) ---------- */
+
+.pdd-profile-perm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #fff;
+  border: 1px solid rgba(13, 43, 69, 0.1);
+  border-radius: 12px;
+  padding: 0.9rem 1.1rem;
+}
+
+.pdd-profile-perm__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pdd-profile-perm__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pdd-profile-perm__gicon {
+  display: inline-grid;
+  place-items: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  background: #fff;
+  border: 1px solid rgba(13, 43, 69, 0.12);
+  border-radius: 6px;
+}
+
+.pdd-profile-perm__head strong {
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.pdd-profile-perm__status {
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  background: rgba(13, 43, 69, 0.08);
+  color: var(--muted);
+}
+
+.pdd-profile-perm__status.is-on {
+  background: var(--teal);
+  color: #fff;
+}
+
+.pdd-profile-perm__desc {
+  margin: 0.35rem 0 0;
+  font-size: 0.83rem;
+  color: var(--muted);
+}
+
+.pdd-profile-perm__msg {
+  margin: 0.45rem 0 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--teal);
+}
+
+.pdd-profile-perm__actions {
+  flex-shrink: 0;
+}
+
+.pdd-profile-perm__btn {
+  border: 1.5px solid var(--teal);
+  background: var(--teal);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.5rem 1.1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.2s ease, color 0.2s ease;
+}
+
+.pdd-profile-perm__btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.pdd-profile-perm__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pdd-profile-perm__btn--danger {
+  background: transparent;
+  border-color: #d32f2f;
+  color: #d32f2f;
+}
+
+.pdd-profile-perm__btn--danger:hover:not(:disabled) {
+  background: #d32f2f;
+  color: #fff;
+}
+
+@media (max-width: 640px) {
+  .pdd-profile-perm {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pdd-profile-perm__actions {
+    width: 100%;
+  }
+}
+
+/* ---------- modal: alterações não salvas ---------- */
+
+.pdd-unsaved-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 27, 48, 0.55);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  padding: 1rem;
+}
+
+.pdd-unsaved-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.pdd-unsaved-modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.8rem 1.8rem 1.6rem;
+  width: 100%;
+  max-width: 24rem;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.35);
+  transform: scale(0.92) translateY(14px);
+  opacity: 0;
+  transition: transform 0.28s cubic-bezier(0.2, 0.9, 0.25, 1.1), opacity 0.28s ease;
+}
+
+.pdd-unsaved-modal.is-open {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+.pdd-unsaved-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--ink, #16293a);
+}
+
+.pdd-unsaved-text {
+  margin: 0 0 1.3rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--muted, #63788a);
+}
+
+.pdd-unsaved-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+}
+
+.pdd-unsaved-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.62rem 1.2rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.pdd-unsaved-btn:active {
+  transform: scale(0.97);
+}
+
+.pdd-unsaved-btn--secondary {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.pdd-unsaved-btn--secondary:hover {
+  background: #dee2e6;
+}
+
+.pdd-unsaved-btn--danger {
+  background: #d32f2f;
+  color: #fff;
+}
+
+.pdd-unsaved-btn--danger:hover {
+  background: #b71c1c;
+}
+
+@media (max-width: 390px) {
+  .pdd-unsaved-modal {
+    padding: 1.4rem 1.2rem 1.3rem;
+  }
+
+  .pdd-unsaved-actions {
+    flex-direction: column-reverse;
+  }
+
+  .pdd-unsaved-btn {
+    width: 100%;
+  }
 }

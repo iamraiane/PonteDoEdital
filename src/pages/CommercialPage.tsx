@@ -347,8 +347,8 @@ export default function CommercialPage() {
           </div>
           <div className="pe-footer__col">
             <h4>Termos</h4>
-            <a href="#top" onClick={(e) => e.preventDefault()}>Termos de uso</a>
-            <a href="#top" onClick={(e) => e.preventDefault()}>Privacidade</a>
+            <a href="/terms" onClick={(e) => { e.preventDefault(); navigate('/terms'); }}>Termos de uso</a>
+            <a href="/privacy" onClick={(e) => { e.preventDefault(); navigate('/privacy'); }}>Privacidade</a>
           </div>
         </div>
         <div className="pe-container pe-footer__bottom">

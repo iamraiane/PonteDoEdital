@@ -1,6 +1,13 @@
 import { useRef, useState, type ChangeEvent } from 'react'
-import { DashIcon, DashAvatar } from './Icons'
+import { DashIcon, DashAvatar, GoogleGlyph } from './Icons'
 import { sanitizeName, validateName, formatCpf } from '../../utils/validation'
+import {
+  isGoogleCalendarAvailable,
+  getGoogleCalendarStatus,
+  connectGoogleCalendar,
+  disconnectGoogleCalendar,
+  type GcalStatus,
+} from '../../services/googleCalendar'
 import './ProfilePage.css'
 
 const INTERESSES = [
@@ -63,6 +70,10 @@ export default function ProfilePage({
   const [saving, setSaving] = useState(false)
   const [nameError, setNameError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [gcalAvailable] = useState(isGoogleCalendarAvailable)
+  const [gcalStatus, setGcalStatus] = useState<GcalStatus>(getGoogleCalendarStatus)
+  const [gcalBusy, setGcalBusy] = useState(false)
+  const [gcalMsg, setGcalMsg] = useState<string | null>(null)
 
   function set<K extends keyof ProfileData>(key: K, value: ProfileData[K]) {
     onChange({ ...profile, [key]: value })
@@ -110,6 +121,38 @@ export default function ProfilePage({
   }
 
   const formattedCpf = profile.cpf ? formatCpf(profile.cpf) : ''
+
+  const gcalConnected = gcalStatus === 'granted'
+
+  async function handleGcalConnect() {
+    setGcalBusy(true)
+    const status = await connectGoogleCalendar()
+    setGcalStatus(status)
+    setGcalBusy(false)
+    setGcalMsg(
+      status === 'granted'
+        ? 'Conectado! Os prazos dos editais salvos serão adicionados à sua agenda.'
+        : 'Conexão não concluída. Você pode tentar de novo quando quiser.',
+    )
+  }
+
+  async function handleGcalDisconnect() {
+    const confirmed = window.confirm(
+      'Desconectar a Google Agenda?\n\nOs prazos já adicionados serão removidos do seu calendário.',
+    )
+    if (!confirmed) return
+    setGcalBusy(true)
+    const { removed, kept } = await disconnectGoogleCalendar()
+    setGcalStatus('skipped')
+    setGcalBusy(false)
+    setGcalMsg(
+      kept > 0
+        ? `Desconectado. ${kept} evento(s) não puderam ser removidos — apague-os pelo Google Agenda, se desejar.`
+        : removed > 0
+          ? `Desconectado. ${removed} evento(s) removido(s) do seu calendário.`
+          : 'Desconectado.',
+    )
+  }
 
   return (
     <div className="pdd-profile-page">
@@ -239,6 +282,55 @@ export default function ProfilePage({
           )}
         </button>
       </div>
+
+      {gcalAvailable && (
+        <section className="pdd-profile-card">
+          <h2>Permissões</h2>
+          <p className="pdd-profile-card__hint">Controle as integrações da sua conta.</p>
+
+          <div className="pdd-profile-perm">
+            <div className="pdd-profile-perm__info">
+              <div className="pdd-profile-perm__head">
+                <span className="pdd-profile-perm__gicon">
+                  <GoogleGlyph />
+                </span>
+                <strong>Google Agenda</strong>
+                <span className={`pdd-profile-perm__status ${gcalConnected ? 'is-on' : ''}`}>
+                  {gcalConnected ? 'Conectado' : 'Desconectado'}
+                </span>
+              </div>
+              <p className="pdd-profile-perm__desc">
+                Adiciona os prazos dos editais salvos ao seu Google Agenda automaticamente.
+              </p>
+              {gcalMsg && <p className="pdd-profile-perm__msg">{gcalMsg}</p>}
+            </div>
+
+            <div className="pdd-profile-perm__actions">
+              {gcalConnected ? (
+                <button
+                  type="button"
+                  className="pdd-profile-perm__btn pdd-profile-perm__btn--danger"
+                  onClick={handleGcalDisconnect}
+                  disabled={gcalBusy || !userActive}
+                  title={!userActive ? 'Conta desativada' : undefined}
+                >
+                  {gcalBusy ? 'Desconectando…' : 'Desconectar'}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="pdd-profile-perm__btn"
+                  onClick={handleGcalConnect}
+                  disabled={gcalBusy || !userActive}
+                  title={!userActive ? 'Conta desativada' : undefined}
+                >
+                  {gcalBusy ? 'Conectando…' : 'Conectar'}
+                </button>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   )
 }
