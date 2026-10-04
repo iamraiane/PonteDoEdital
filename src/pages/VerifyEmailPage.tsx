@@ -43,8 +43,12 @@ export default function VerifyEmailPage() {
   const token = searchParams.get('token')
 
   const [mounted, setMounted] = useState(false)
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
-  const [errorMsg, setErrorMsg] = useState('')
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(() =>
+    token ? 'loading' : 'error',
+  )
+  const [errorMsg, setErrorMsg] = useState(() =>
+    token ? '' : 'Token de verificação não encontrado.',
+  )
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true))
@@ -52,11 +56,7 @@ export default function VerifyEmailPage() {
   }, [])
 
   useEffect(() => {
-    if (!token) {
-      setStatus('error')
-      setErrorMsg('Token de verificação não encontrado.')
-      return
-    }
+    if (!token) return
 
     verifyEmail(token)
       .then(() => setStatus('success'))

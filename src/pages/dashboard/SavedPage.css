@@ -120,20 +120,24 @@
   place-items: center;
 }
 
-/* semanas sem eventos (entre dois prazos) */
+/* divisores de mês (seções do timeline) */
 
-.pdd-agenda-week {
+.pdd-agenda-month {
   display: grid;
   grid-template-columns: 4.2rem 1fr;
   gap: 0.9rem;
-  padding: 0.45rem 0;
+  padding: 0.85rem 0 0.3rem;
 }
 
-.pdd-agenda-week span {
+.pdd-agenda-month span {
   grid-column: 2;
-  font-size: 0.76rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
   color: var(--muted);
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(13, 43, 69, 0.14);
 }
 
 /* chips de evento */
@@ -339,7 +343,7 @@
 
 @media (max-width: 640px) {
   .pdd-agenda-row,
-  .pdd-agenda-week {
+  .pdd-agenda-month {
     grid-template-columns: 2.9rem 1fr;
     gap: 0.55rem;
   }

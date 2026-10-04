@@ -14,22 +14,26 @@ import { getTokenPayload, getUserById } from './services/user'
 
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+// Avalia a sessão uma vez por carregamento de página (o login usa window.location,
+// garantindo reload). Assim o render não precisa chamar Date.now (pureza do React).
+function peekSession(): { id: number } | null {
   const token = localStorage.getItem('token')
   const loginTime = localStorage.getItem('loginTime')
-
-  if (!token || !loginTime) return <Navigate to="/login" replace />
-  if (Date.now() - Number(loginTime) > THREE_DAYS_MS) {
-    localStorage.removeItem('token')
-    localStorage.removeItem('loginTime')
-    return <Navigate to="/login" replace />
-  }
+  if (!token || !loginTime) return null
+  if (Date.now() - Number(loginTime) > THREE_DAYS_MS) return null
   const payload = getTokenPayload()
-  if (!payload?.id) {
-    localStorage.removeItem('token')
-    localStorage.removeItem('loginTime')
-    return <Navigate to="/login" replace />
-  }
+  return payload?.id ? payload : null
+}
+
+const sessionAtLoad = peekSession()
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  if (!sessionAtLoad) return <Navigate to="/login" replace />
+  const token = localStorage.getItem('token')
+  const loginTime = localStorage.getItem('loginTime')
+  if (!token || !loginTime) return <Navigate to="/login" replace />
+  const payload = getTokenPayload()
+  if (!payload?.id) return <Navigate to="/login" replace />
 
   return <>{children}</>
 }
@@ -39,33 +43,16 @@ function App() {
   const [userId, setUserId] = useState<number | undefined>()
   const [userRole, setUserRole] = useState<string>('')
   const [userActive, setUserActive] = useState(true)
-  const [checking, setChecking] = useState(true)
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    const loginTime = localStorage.getItem('loginTime')
-
-    if (!token || !loginTime) {
-      setChecking(false)
-      return
-    }
-
-    if (Date.now() - Number(loginTime) > THREE_DAYS_MS) {
+    if (!sessionAtLoad) {
       localStorage.removeItem('token')
       localStorage.removeItem('loginTime')
-      setChecking(false)
       return
     }
 
-    const payload = getTokenPayload()
-    if (!payload?.id) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('loginTime')
-      setChecking(false)
-      return
-    }
-
-    getUserById(payload.id)
+    getUserById(sessionAtLoad.id)
       .then((user) => {
         setUserName(user.name)
         setUserId(user.id)
@@ -76,7 +63,7 @@ function App() {
         localStorage.removeItem('token')
         localStorage.removeItem('loginTime')
       })
-      .finally(() => setChecking(false))
+      .finally(() => setLoaded(true))
   }, [])
 
   function handleLogout() {
@@ -85,7 +72,7 @@ function App() {
     window.location.href = '/login'
   }
 
-  if (checking) return null
+  if (sessionAtLoad && !loaded) return null
 
   return (
     <BrowserRouter>

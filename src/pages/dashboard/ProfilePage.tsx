@@ -115,6 +115,7 @@ export default function ProfilePage({
       setNameError(null)
       window.setTimeout(() => setSaved(false), 2200)
     } catch {
+      // falha ao gravar: o estado 'saving' é liberado no finally
     } finally {
       setSaving(false)
     }

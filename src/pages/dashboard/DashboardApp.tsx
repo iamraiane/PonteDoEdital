@@ -61,7 +61,7 @@ export default function DashboardApp({
 }) {
   const navigate = useNavigate()
   const location = useLocation()
-  const [hasPremium, setHasPremium] = useState(false)
+  const hasPremium = userRole === 'premium' || userRole === 'admin'
   const [profile, setProfile] = useState<ProfileData>({
     nome: userName || '',
     email: '',
@@ -97,10 +97,6 @@ export default function DashboardApp({
   const pathSegment = location.pathname.split('/')[2] || 'feed'
   const page: PageKey = ROUTE_MAP[pathSegment] || 'feed'
   const isDirty = page === 'profile' && !profilesEqual(profile, savedProfile)
-
-  useEffect(() => {
-    setHasPremium(userRole === 'premium' || userRole === 'admin')
-  }, [userRole])
 
   async function handleSaveProfile() {
     if (!userId) return

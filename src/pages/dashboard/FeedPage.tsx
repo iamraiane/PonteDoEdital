@@ -44,7 +44,10 @@ function formatTimeAgo(dateStr: string | null): string {
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return 'Sem prazo'
-  const date = new Date(dateStr)
+  const iso = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr)
+  const date = iso
+    ? new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]))
+    : new Date(dateStr)
   return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
@@ -93,7 +96,6 @@ function matchesStates(e: Edital, states: string[]): boolean {
 export default function FeedPage({ userName, userId, hasPremium = false, userActive = true, onNavigate }: { userName: string; userId?: number; hasPremium?: boolean; userActive?: boolean; onNavigate?: (page: string) => void }) {
   const { query, months, states, setCounts, activeCount, clearFilters } = useFeedFilters()
   const [salvos, setSalvos] = useState<Record<string, boolean>>({})
-  const [agendados, setAgendados] = useState<Record<string, boolean>>({})
   const [editais, setEditais] = useState<Edital[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -102,7 +104,6 @@ export default function FeedPage({ userName, userId, hasPremium = false, userAct
 
   useEffect(() => {
     if (!userId) return
-    setLoading(true)
     Promise.all([
       getNotices(userId),
       getFavorites().catch(() => []),
@@ -151,10 +152,6 @@ export default function FeedPage({ userName, userId, hasPremium = false, userAct
           setFavoriteError(err.message || 'Erro ao salvar edital')
         }
       })
-  }
-
-  function agendar(id: string) {
-    setAgendados((s) => ({ ...s, [id]: true }))
   }
 
   const queryNorm = normalizeText(query.trim())
@@ -241,24 +238,13 @@ export default function FeedPage({ userName, userId, hasPremium = false, userAct
             <div className="pdd-edital-card__actions">
               <button
                 type="button"
-                className={`pdd-btn-outline ${agendados[e.id] ? 'is-done' : ''}`}
-                disabled={!userActive}
-                title={userActive ? undefined : 'Conta desativada'}
-                onClick={() => hasPremium ? agendar(e.id) : onNavigate?.('plans')}
-              >
-                <DashIcon name="schedule" />
-                {agendados[e.id] ? 'Agendado' : 'Agendar prazo'}
-                {!hasPremium && <span className="pdd-btn-outline__trophy"><DashIcon name="trophy" /></span>}
-              </button>
-              <button
-                type="button"
-                className={`pdd-bookmark-btn ${salvos[e.id] ? 'is-active' : ''}`}
+                className={`pdd-btn-outline ${salvos[e.id] ? 'is-done' : ''}`}
                 disabled={!userActive}
                 title={userActive ? undefined : 'Conta desativada'}
                 onClick={() => toggleSalvo(e.id)}
-                aria-label={salvos[e.id] ? 'Remover dos salvos' : 'Salvar edital'}
               >
                 <DashIcon name={salvos[e.id] ? 'bookmark-filled' : 'bookmark'} />
+                {salvos[e.id] ? 'Edital salvo' : 'Salvar edital'}
               </button>
             </div>
 

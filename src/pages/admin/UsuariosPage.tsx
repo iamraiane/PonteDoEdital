@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DashIcon } from '../dashboard/Icons'
 import { getAllUsers, promoteToAdmin, demoteToUser, promoteToPremium, disableUser, activateUser, getTokenPayload } from '../../services/user'
@@ -20,22 +20,20 @@ export default function UsuariosPage() {
   const [toast, setToast] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    loadUsers()
+  const avisar = useCallback((msg: string) => {
+    setToast(msg)
+    setTimeout(() => setToast(null), 2200)
   }, [])
 
-  async function loadUsers() {
-    try {
-      setLoading(true)
-      const data = await getAllUsers()
-      setUsuarios(data)
-    } catch (err) {
-      console.error('Erro ao carregar usuários:', err)
-      avisar('Erro ao carregar usuários')
-    } finally {
-      setLoading(false)
-    }
-  }
+  useEffect(() => {
+    getAllUsers()
+      .then((data) => setUsuarios(data))
+      .catch((err) => {
+        console.error('Erro ao carregar usuários:', err)
+        avisar('Erro ao carregar usuários')
+      })
+      .finally(() => setLoading(false))
+  }, [avisar])
 
   const termo = busca.toLowerCase()
   const filtrados = usuarios.filter((u) => {
@@ -43,11 +41,6 @@ export default function UsuariosPage() {
     if (!mostrarTodos) return bate && u.role === 'user'
     return bate
   })
-
-  function avisar(msg: string) {
-    setToast(msg)
-    setTimeout(() => setToast(null), 2200)
-  }
 
   async function salvarStatus(id: number, isAdmin: boolean, isPremium: boolean, ativo: boolean) {
     try {

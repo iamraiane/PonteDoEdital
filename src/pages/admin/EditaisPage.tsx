@@ -18,7 +18,11 @@ function mapNoticeToEdital(n: NoticeApi): Edital {
   const dateStr = n.publication_date
   let prazo = 'Sem prazo'
   if (dateStr) {
-    prazo = new Date(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+    const iso = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr)
+    const d = iso
+      ? new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]))
+      : new Date(dateStr)
+    prazo = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
   }
   return {
     id: String(n.id),
@@ -40,7 +44,6 @@ export default function EditaisPage() {
   useEffect(() => {
     const payload = getTokenPayload()
     if (!payload?.id) return
-    setLoading(true)
     getNotices(payload.id)
       .then((data) => setEditais(data.map(mapNoticeToEdital)))
       .catch(() => setError('Erro ao carregar editais'))
@@ -65,7 +68,9 @@ export default function EditaisPage() {
     try {
       const d = new Date(dataBR)
       if (!isNaN(d.getTime())) return d.toISOString().split('T')[0]
-    } catch {}
+    } catch {
+      // data não interpretável: mantém a data existente (fallback)
+    }
     return fallback
   }
 

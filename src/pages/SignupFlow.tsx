@@ -278,10 +278,6 @@ export default function SignupFlow() {
     saveDraft({ form: toDraftForm(form), acceptTerms, step, userEmail })
   }, [form, acceptTerms, step, userEmail])
 
-  useEffect(() => {
-    if (form.dataNascimento.length > 0) setDataNascimentoError('')
-  }, [form.dataNascimento])
-
   const passwordChecks = getPasswordChecks(form.senha)
   const senhaValid = isPasswordValid(passwordChecks)
   const senhasCoincidem = form.confirmarSenha.length > 0 && form.confirmarSenha === form.senha
@@ -489,7 +485,9 @@ export default function SignupFlow() {
                   onAcceptTermsChange={setAcceptTerms}
                   termsError={termsError}
                   setTermsError={setTermsError}
-                  dataNascimentoError={dataNascimentoError}
+                  dataNascimentoError={
+                    form.dataNascimento.length > 0 ? '' : dataNascimentoError
+                  }
                 />
               )}
               {step === 2 && (

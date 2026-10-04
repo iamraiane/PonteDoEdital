@@ -13,9 +13,9 @@ import {
 import './SavedPage.css'
 
 const WEEKDAYS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb']
-const MONTHS_SHORT = [
-  'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
-  'jul', 'ago', 'set', 'out', 'nov', 'dez',
+const MONTHS_FULL = [
+  'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+  'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
 ]
 
 function todayKey(): string {
@@ -23,33 +23,9 @@ function todayKey(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-function toKey(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-
 function parseDateKey(key: string): Date {
   const [y, m, d] = key.split('-').map(Number)
   return new Date(y, (m || 1) - 1, d || 1)
-}
-
-function addDays(d: Date, days: number): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate() + days)
-}
-
-function weekStartKey(dateKey: string): string {
-  const d = parseDateKey(dateKey)
-  const day = d.getDay()
-  const diff = day === 0 ? -6 : 1 - day
-  return toKey(addDays(d, diff))
-}
-
-function weekLabel(weekKey: string): string {
-  const start = parseDateKey(weekKey)
-  const end = addDays(start, 6)
-  if (start.getMonth() === end.getMonth()) {
-    return `${start.getDate()} - ${end.getDate()} de ${MONTHS_SHORT[end.getMonth()]}`
-  }
-  return `${start.getDate()} de ${MONTHS_SHORT[start.getMonth()]} - ${end.getDate()} de ${MONTHS_SHORT[end.getMonth()]}`
 }
 
 function noticeDate(fav: Favorite): string | null {
@@ -137,7 +113,7 @@ function AgendaChip({
 type DateGroup = { date: string; items: Favorite[] }
 type TimelineEntry =
   | { kind: 'date'; key: string; group: DateGroup }
-  | { kind: 'week'; key: string; label: string }
+  | { kind: 'month'; key: string; label: string }
 
 function startSync(
   favorites: Favorite[],
@@ -184,7 +160,6 @@ export default function SavedPage({ userId, userActive = true }: { userId?: numb
 
   useEffect(() => {
     if (!userId) return
-    setLoading(true)
     getFavorites()
       .then((data) => {
         setItems(data)
@@ -245,25 +220,15 @@ export default function SavedPage({ userId, userActive = true }: { userId?: numb
       .map(([date, groupItems]) => ({ date, items: groupItems }))
 
     const entries: TimelineEntry[] = []
-    if (groups.length > 0) {
-      const byWeek = new Map<string, DateGroup[]>()
-      for (const group of groups) {
-        const week = weekStartKey(group.date)
-        const arr = byWeek.get(week)
-        if (arr) arr.push(group)
-        else byWeek.set(week, [group])
+    let currentMonth = ''
+    for (const group of groups) {
+      const monthKey = group.date.slice(0, 7)
+      if (monthKey !== currentMonth) {
+        currentMonth = monthKey
+        const [y, m] = monthKey.split('-').map(Number)
+        entries.push({ kind: 'month', key: monthKey, label: `${MONTHS_FULL[m - 1]} de ${y}` })
       }
-      const lastWeek = weekStartKey(groups[groups.length - 1].date)
-      let cursor = weekStartKey(groups[0].date)
-      while (cursor <= lastWeek) {
-        const inWeek = byWeek.get(cursor)
-        if (inWeek && inWeek.length > 0) {
-          for (const group of inWeek) entries.push({ kind: 'date', key: group.date, group })
-        } else {
-          entries.push({ kind: 'week', key: cursor, label: weekLabel(cursor) })
-        }
-        cursor = toKey(addDays(parseDateKey(cursor), 7))
-      }
+      entries.push({ kind: 'date', key: group.date, group })
     }
 
     return { timeline: entries, expired: expiredItems, noDate: withoutDate }
@@ -341,8 +306,8 @@ export default function SavedPage({ userId, userActive = true }: { userId?: numb
       {!loading && items.length > 0 && (
         <div className="pdd-agenda">
           {timeline.map((entry) =>
-            entry.kind === 'week' ? (
-              <div key={entry.key} className="pdd-agenda-week">
+            entry.kind === 'month' ? (
+              <div key={entry.key} className="pdd-agenda-month">
                 <span>{entry.label}</span>
               </div>
             ) : (
