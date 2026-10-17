@@ -10,6 +10,7 @@ import AdminApp from './pages/admin/AdminApp'
 import CommercialPage from './pages/CommercialPage'
 import TermsPage from './pages/TermsPage'
 import PrivacyPage from './pages/PrivacyPage'
+import PremiumReturnPage from './pages/PremiumReturnPage'
 import { getTokenPayload, getUserById } from './services/user'
 
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000
@@ -86,6 +87,14 @@ function App() {
         <Route index element={<Navigate to="/commercial" replace />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
+        <Route
+          path="/premium/retorno"
+          element={
+            <ProtectedRoute>
+              <PremiumReturnPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/dashboard/*"
           element={

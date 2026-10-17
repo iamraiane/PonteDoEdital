@@ -15,7 +15,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>
 }
 
-async function authRequest<T>(path: string, init?: RequestInit): Promise<T> {
+export async function authRequest<T>(path: string, init?: RequestInit): Promise<T> {
   const token = localStorage.getItem('token')
   const res = await fetch(`${API_BASE}/${path}`, {
     ...init,

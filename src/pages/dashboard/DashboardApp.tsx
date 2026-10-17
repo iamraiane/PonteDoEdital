@@ -183,7 +183,7 @@ export default function DashboardApp({
           <Route path="feed" element={<FeedPage userName={firstName} userId={userId} hasPremium={hasPremium} userActive={userActive} onNavigate={(p) => navigate(`/dashboard/${p}`)} />} />
           <Route path="calendar" element={<CalendarPage hasPremium={hasPremium} userId={userId} onNavigate={(p) => navigate(`/dashboard/${p}`)} />} />
           <Route path="saved" element={<SavedPage userId={userId} userActive={userActive} />} />
-          <Route path="plans" element={<PlansPage />} />
+          <Route path="plans" element={<PlansPage hasPremium={hasPremium} />} />
           <Route path="faq" element={<FaqPage />} />
           <Route path="about" element={<AboutPage />} />
           <Route path="profile" element={<ProfilePage profile={profile} onChange={setProfile} onSave={handleSaveProfile} userActive={userActive} />} />
