@@ -145,11 +145,52 @@ export default function CommercialPage() {
   const [heroPlayed, setHeroPlayed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [loader, setLoader] = useState<"loading" | "fading" | "gone">("loading");
 
   useEffect(() => {
-    const t = requestAnimationFrame(() => setHeroPlayed(true));
-    return () => cancelAnimationFrame(t);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let cancelled = false;
+    let fadeTimer: number | undefined;
+
+    const images = Promise.all(
+      [logoPonte, logoNome].map(
+        (src) =>
+          new Promise<void>((resolve) => {
+            const img = new Image();
+            img.onload = img.onerror = () => resolve();
+            img.src = src;
+          })
+      )
+    );
+    const minDelay = new Promise<void>((resolve) =>
+      window.setTimeout(resolve, reduced ? 0 : 700)
+    );
+
+    Promise.all([images, minDelay]).then(() => {
+      if (cancelled) return;
+      setHeroPlayed(true);
+      setLoader("fading");
+      fadeTimer = window.setTimeout(() => {
+        if (!cancelled) setLoader("gone");
+      }, reduced ? 0 : 350);
+    });
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(fadeTimer);
+    };
   }, []);
+
+  useEffect(() => {
+    if (loader === "gone") {
+      document.body.style.overflow = "";
+      return;
+    }
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [loader]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -165,6 +206,20 @@ export default function CommercialPage() {
 
   return (
     <div className="pe">
+      {loader !== "gone" && (
+        <div
+          className={`pe-loader ${loader === "fading" ? "pe-loader--fading" : ""}`}
+          role="status"
+          aria-label="Carregando"
+        >
+          <span className="pe-loader__brand">
+            <img src={logoPonte} alt="" aria-hidden="true" className="pe-loader__icon" />
+            <img src={logoNome} alt="" aria-hidden="true" className="pe-loader__logo" />
+          </span>
+          <span className="pe-loader__spinner" />
+        </div>
+      )}
+
       {/* Header */}
       <header className={`pe-header ${scrolled ? "pe-header--scrolled" : ""}`}>
         <div className="pe-container pe-header__row">

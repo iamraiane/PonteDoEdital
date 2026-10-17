@@ -5,9 +5,38 @@
     <link rel="icon" type="image/png" href="/src/assets/PonteIcon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ponte do Edital</title>
+    <style>
+      .pe-boot-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0d2b45;
+      }
+      .pe-boot-loader__spinner {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 3px solid rgba(0, 212, 194, 0.25);
+        border-top-color: #00d4c2;
+        animation: pe-boot-spin 0.8s linear infinite;
+      }
+      @keyframes pe-boot-spin {
+        to { transform: rotate(360deg); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .pe-boot-loader__spinner { animation: none; }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="pe-boot-loader" role="status" aria-label="Carregando">
+        <span class="pe-boot-loader__spinner"></span>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
