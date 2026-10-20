@@ -39,6 +39,19 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+function AdminRoute({
+  userRole,
+  userActive,
+  children,
+}: {
+  userRole: string
+  userActive: boolean
+  children: React.ReactNode
+}) {
+  if (userRole !== 'admin' || !userActive) return <Navigate to="/dashboard" replace />
+  return <>{children}</>
+}
+
 function App() {
   const [userName, setUserName] = useState('')
   const [userId, setUserId] = useState<number | undefined>()
@@ -113,16 +126,14 @@ function App() {
         <Route
           path="/admin/*"
           element={
-            userActive ? (
+            <AdminRoute userRole={userRole} userActive={userActive}>
               <ProtectedRoute>
                 <AdminApp
                   onExitAdmin={() => window.location.href = '/dashboard'}
                   onLogout={handleLogout}
                 />
               </ProtectedRoute>
-            ) : (
-              <Navigate to="/dashboard" replace />
-            )
+            </AdminRoute>
           }
         />
         <Route path="*" element={<Navigate to="/login" replace />} />
