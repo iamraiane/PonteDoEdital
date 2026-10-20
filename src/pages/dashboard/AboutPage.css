@@ -136,21 +136,23 @@
   }
 }
 
+/* Em telas estreitas a equipe vai para 1 coluna: com 2 colunas o texto do
+   cargo fica espremido e some atrás da barra inferior. */
+@media (max-width: 430px) {
+  .pdd-team-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ---------- responsivo: Xiaomi, Pocophone, iPhone SE ---------- */
 
 @media (max-width: 390px) {
   .pdd-team-grid {
-    grid-template-columns: repeat(2, 1fr);
     gap: 0.6rem;
   }
 
   .pdd-team-card {
     padding: 0.8rem 0.7rem;
-  }
-
-  .pdd-team-card svg {
-    width: 2.5rem;
-    height: 2.5rem;
   }
 
   .pdd-team-card__nome {

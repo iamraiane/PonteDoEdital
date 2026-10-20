@@ -115,6 +115,7 @@ html, body {
   font-size: 0.88rem;
   font-family: inherit;
   outline: none;
+  text-overflow: ellipsis;
   transition: border-color 0.25s ease, background 0.25s ease;
 }
 
@@ -752,9 +753,12 @@ html, body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* min-height (e não height) para o container crescer com o conteúdo:
+   assim o padding-bottom do .pdd-main cai depois do último elemento
+   e o conteúdo não fica escondido atrás da barra inferior. */
 .pdd-page-enter {
   animation: pdd-page-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-  height: 100%;
+  min-height: 100%;
 }
 
 @keyframes pdd-page-in {
@@ -792,19 +796,19 @@ html, body {
   }
 
   .pdd-main {
-    padding: 1.3rem 1rem calc(1.4rem + 3.6rem);
+    padding: 1.3rem 1rem 1.2rem;
   }
 
+  /* A barra é filha do shell (não position: fixed): ela nunca cobre o
+     conteúdo e não "salta" quando a URL bar do navegador recolhe. */
   .pdd-tabbar {
     display: flex;
+    flex: 0 0 auto;
+    position: relative;
+    z-index: 20;
     align-items: stretch;
     justify-content: space-around;
     gap: 0.15rem;
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 20;
     background: var(--navy);
     padding: 0.35rem 0.4rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
     box-shadow: 0 -6px 18px -12px rgba(13, 43, 69, 0.55);
@@ -916,6 +920,15 @@ html, body {
   .pdd-tabbar__item {
     font-size: 0.62rem;
   }
+
+  .pdd-search input {
+    padding-left: 2.15rem;
+    font-size: 0.82rem;
+  }
+
+  .pdd-search__glyph {
+    left: 0.7rem;
+  }
 }
 
 /* ---------- responsivo: Xiaomi, Pocophone, iPhone SE ---------- */
@@ -945,7 +958,7 @@ html, body {
   }
 
   .pdd-main {
-    padding: 1rem 0.8rem calc(1.2rem + 3.6rem);
+    padding: 1rem 0.8rem 1rem;
   }
 
   .pdd-notif-panel {
