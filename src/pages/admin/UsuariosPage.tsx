@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { DashIcon } from '../dashboard/Icons'
 import { getAllUsers, promoteToAdmin, demoteToUser, promoteToPremium, disableUser, activateUser, getTokenPayload } from '../../services/user'
 import type { UserData } from '../../services/user'
+import { Spinner } from '../../components/AppLoader'
 import './EditaisPage.css'
 import './UsuariosPage.css'
 
@@ -101,7 +102,7 @@ export default function UsuariosPage() {
     return (
       <div className="pda-usuarios-page">
         <h1 className="pda-page-title">Gerenciamento de Usuários</h1>
-        <p className="pda-page-sub">Carregando usuários...</p>
+        <Spinner label="Carregando usuários..." />
       </div>
     )
   }

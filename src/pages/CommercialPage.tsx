@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import logoPonte from "../assets/logo-ponte.png";
 import logoNome from "../assets/logo-nome.png";
+import AppLoader from "../components/AppLoader";
 import "./CommercialPage.css";
 
 const STATS = [
@@ -207,17 +208,7 @@ export default function CommercialPage() {
   return (
     <div className="pe">
       {loader !== "gone" && (
-        <div
-          className={`pe-loader ${loader === "fading" ? "pe-loader--fading" : ""}`}
-          role="status"
-          aria-label="Carregando"
-        >
-          <span className="pe-loader__brand">
-            <img src={logoPonte} alt="" aria-hidden="true" className="pe-loader__icon" />
-            <img src={logoNome} alt="" aria-hidden="true" className="pe-loader__logo" />
-          </span>
-          <span className="pe-loader__spinner" />
-        </div>
+        <AppLoader fading={loader === "fading"} />
       )}
 
       {/* Header */}

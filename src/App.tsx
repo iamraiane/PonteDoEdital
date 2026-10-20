@@ -12,6 +12,7 @@ import TermsPage from './pages/TermsPage'
 import PrivacyPage from './pages/PrivacyPage'
 import PremiumReturnPage from './pages/PremiumReturnPage'
 import { getTokenPayload, getUserById } from './services/user'
+import AppLoader from './components/AppLoader'
 
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000
 
@@ -86,7 +87,7 @@ function App() {
     window.location.href = '/login'
   }
 
-  if (sessionAtLoad && !loaded) return null
+  if (sessionAtLoad && !loaded) return <AppLoader />
 
   return (
     <BrowserRouter>

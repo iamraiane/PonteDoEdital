@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { DashIcon } from '../dashboard/Icons'
 import { getNotices, updateNotice, deleteNotice, type NoticeApi } from '../../services/notice'
 import { getTokenPayload } from '../../services/user'
+import { Spinner } from '../../components/AppLoader'
 import './EditaisPage.css'
 
 type Edital = {
@@ -120,7 +121,7 @@ export default function EditaisPage() {
         </label>
       </div>
 
-      {loading && <p>Carregando editais...</p>}
+      {loading && <Spinner label="Carregando editais..." />}
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
       {!loading && (
