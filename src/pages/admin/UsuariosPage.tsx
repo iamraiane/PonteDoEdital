@@ -155,7 +155,7 @@ export default function UsuariosPage() {
             {filtrados.map((u, i) => (
               <tr key={u.id} style={{ animationDelay: `${i * 40}ms` }}>
                 <td data-label="Usuário">
-                  <div className="pda-user-cell">
+                  <div className="pda-cell pda-user-cell">
                     <span className="pda-avatar">{iniciais(u.name)}</span>
                     <span className="pda-cell-title">{u.name}</span>
                   </div>
@@ -182,7 +182,7 @@ export default function UsuariosPage() {
       </div>
 
       {editando && (
-        <EditarStatusModal usuario={editando} onCancel={() => setEditando(null)} onSave={salvarStatus} />
+        <EditarStatusPanel usuario={editando} onCancel={() => setEditando(null)} onSave={salvarStatus} />
       )}
 
       {toast && <div className="pda-toast">{toast}</div>}
@@ -190,7 +190,7 @@ export default function UsuariosPage() {
   )
 }
 
-function EditarStatusModal({
+function EditarStatusPanel({
   usuario,
   onCancel,
   onSave,
@@ -211,69 +211,86 @@ function EditarStatusModal({
   }
 
   return (
-    <div className="pda-overlay" onClick={onCancel}>
+    <>
+      <div className="pda-side-panel-overlay" onClick={onCancel} />
       <div
-        className="pda-modal pda-modal--dark pda-modal--left"
-        onClick={(e) => e.stopPropagation()}
+        className="pda-side-panel pda-side-panel--status"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Editar status do usuário"
       >
-        <h2 className="pda-modal-title">Editar Status</h2>
-        <p className="pda-modal-note pda-modal-note--tight">{usuario.name}</p>
-
-        <div className="pda-status-row">
-          Habilitar para Admin
+        <div className="pda-side-panel__header">
+          <h2 className="pda-side-panel__title">Editar Status</h2>
           <button
             type="button"
-            className={`pda-switch ${isAdmin ? 'is-on' : ''}`}
-            aria-pressed={isAdmin}
-            onClick={toggleAdmin}
+            className="pda-side-panel__close"
+            onClick={onCancel}
+            aria-label="Fechar"
           >
-            <span className="pda-switch__knob" />
+            <DashIcon name="close" />
           </button>
         </div>
 
-        <div
-          className="pda-status-row"
-          style={isAdmin ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
-        >
-          Habilitar para Premium
-          <button
-            type="button"
-            className={`pda-switch ${isPremium ? 'is-on' : ''}`}
-            aria-pressed={isPremium}
-            disabled={isAdmin}
-            title={isAdmin ? 'Admin já possui acesso premium' : 'Habilitar premium'}
-            onClick={() => setIsPremium((v) => !v)}
+        <div className="pda-side-panel__body">
+          <p className="pda-modal-note pda-modal-note--tight">{usuario.name}</p>
+
+          <div className="pda-status-row">
+            Habilitar para Admin
+            <button
+              type="button"
+              className={`pda-switch ${isAdmin ? 'is-on' : ''}`}
+              aria-pressed={isAdmin}
+              onClick={toggleAdmin}
+            >
+              <span className="pda-switch__knob" />
+            </button>
+          </div>
+
+          <div
+            className="pda-status-row"
+            style={isAdmin ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
           >
-            <span className="pda-switch__knob" />
-          </button>
+            Habilitar para Premium
+            <button
+              type="button"
+              className={`pda-switch ${isPremium ? 'is-on' : ''}`}
+              aria-pressed={isPremium}
+              disabled={isAdmin}
+              title={isAdmin ? 'Admin já possui acesso premium' : 'Habilitar premium'}
+              onClick={() => setIsPremium((v) => !v)}
+            >
+              <span className="pda-switch__knob" />
+            </button>
+          </div>
+
+          <div
+            className="pda-status-row"
+            style={isSelf ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
+          >
+            Habilitar usuário
+            <button
+              type="button"
+              className={`pda-switch ${ativo ? 'is-on' : ''}`}
+              aria-pressed={ativo}
+              disabled={isSelf}
+              title={isSelf ? 'Você não pode desativar sua própria conta' : 'Conta ativa'}
+              onClick={() => setAtivo((v) => !v)}
+            >
+              <span className="pda-switch__knob" />
+            </button>
+          </div>
         </div>
 
-        <div
-          className="pda-status-row"
-          style={isSelf ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
-        >
-          Habilitar usuário
+        <div className="pda-side-panel__footer">
           <button
             type="button"
-            className={`pda-switch ${ativo ? 'is-on' : ''}`}
-            aria-pressed={ativo}
-            disabled={isSelf}
-            title={isSelf ? 'Você não pode desativar sua própria conta' : 'Conta ativa'}
-            onClick={() => setAtivo((v) => !v)}
+            className="pda-btn pda-btn--teal"
+            onClick={() => onSave(usuario.id, isAdmin, isPremium, ativo)}
           >
-            <span className="pda-switch__knob" />
+            Salvar
           </button>
         </div>
-
-        <button
-          type="button"
-          className="pda-btn pda-btn--teal"
-          style={{ marginTop: '1.1rem' }}
-          onClick={() => onSave(usuario.id, isAdmin, isPremium, ativo)}
-        >
-          Salvar
-        </button>
       </div>
-    </div>
+    </>
   )
 }

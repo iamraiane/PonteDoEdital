@@ -146,8 +146,10 @@ export default function EditaisPage() {
             {filtrados.map((edital, i) => (
               <tr key={edital.id} className={menuAberto === edital.id ? 'pda-row--menu-open' : ''} style={{ animationDelay: `${i * 40}ms` }}>
                 <td data-label="Título">
-                  <span className="pda-cell-title">{edital.titulo}</span>
-                  <span className="pda-cell-sub">{edital.orgao}</span>
+                  <div className="pda-cell">
+                    <span className="pda-cell-title">{edital.titulo}</span>
+                    <span className="pda-cell-sub">{edital.orgao}</span>
+                  </div>
                 </td>
                 <td data-label="Estado">{edital.orgao}</td>
                 <td data-label="UF">{edital.stateCode}</td>
@@ -226,26 +228,16 @@ function EditarEditalSidePanel({
   onSave: (e: Edital) => void
 }) {
   const [form, setForm] = useState<Edital>(edital)
-  const [panelTop, setPanelTop] = useState(80)
-
-  useEffect(() => {
-    const scrollContainer = document.querySelector('.pda-main')
-    if (!scrollContainer) return
-
-    function handleScroll() {
-      if (scrollContainer) {
-        setPanelTop(scrollContainer.scrollTop + 80)
-      }
-    }
-    scrollContainer.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll()
-    return () => scrollContainer.removeEventListener('scroll', handleScroll)
-  }, [])
 
   return (
     <>
       <div className="pda-side-panel-overlay" onClick={onCancel} />
-      <div className="pda-side-panel" style={{ top: `${panelTop}px` }}>
+      <div
+        className="pda-side-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Editar edital"
+      >
         <div className="pda-side-panel__header">
           <h2 className="pda-side-panel__title">Editar edital</h2>
           <button
@@ -258,57 +250,61 @@ function EditarEditalSidePanel({
           </button>
         </div>
 
-        <div className="pda-field">
-          <label>Título</label>
-          <textarea
-            rows={1}
-            value={form.titulo}
-            onChange={(e) => setForm({ ...form, titulo: e.target.value })}
-          />
+        <div className="pda-side-panel__body">
+          <div className="pda-field">
+            <label>Título</label>
+            <textarea
+              rows={1}
+              value={form.titulo}
+              onChange={(e) => setForm({ ...form, titulo: e.target.value })}
+            />
+          </div>
+
+          <div className="pda-field">
+            <label>Estado</label>
+            <input
+              type="text"
+              value={form.orgao}
+              disabled
+              className="pda-field--readonly"
+            />
+          </div>
+
+          <div className="pda-field">
+            <label>UF</label>
+            <input
+              type="text"
+              value={form.stateCode}
+              disabled
+              className="pda-field--readonly"
+            />
+          </div>
+
+          <div className="pda-field">
+            <label>Descrição</label>
+            <textarea
+              rows={1}
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+            />
+          </div>
+
+          <div className="pda-field">
+            <label>Data de publicação</label>
+            <input
+              type="text"
+              value={form.prazo}
+              onChange={(e) => setForm({ ...form, prazo: e.target.value })}
+              placeholder="Ex: 03 Ago 2026"
+            />
+          </div>
         </div>
 
-        <div className="pda-field">
-          <label>Estado</label>
-          <input
-            type="text"
-            value={form.orgao}
-            disabled
-            className="pda-field--readonly"
-          />
+        <div className="pda-side-panel__footer">
+          <button type="button" className="pda-btn pda-btn--teal" onClick={() => onSave(form)}>
+            Salvar Alterações
+          </button>
         </div>
-
-        <div className="pda-field">
-          <label>UF</label>
-          <input
-            type="text"
-            value={form.stateCode}
-            disabled
-            className="pda-field--readonly"
-          />
-        </div>
-
-        <div className="pda-field">
-          <label>Descrição</label>
-          <textarea
-            rows={1}
-            value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-          />
-        </div>
-
-        <div className="pda-field">
-          <label>Data de publicação</label>
-          <input
-            type="text"
-            value={form.prazo}
-            onChange={(e) => setForm({ ...form, prazo: e.target.value })}
-            placeholder="Ex: 03 Ago 2026"
-          />
-        </div>
-
-        <button type="button" className="pda-btn pda-btn--teal" onClick={() => onSave(form)}>
-          Salvar Alterações
-        </button>
       </div>
     </>
   )

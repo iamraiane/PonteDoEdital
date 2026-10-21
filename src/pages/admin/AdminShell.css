@@ -42,6 +42,14 @@
 
 /* ---------- header ---------- */
 
+/* Regra de ouro do painel: nenhum ancestral de um elemento `position: fixed`
+   (painel lateral, overlay, toast) pode ter `transform` no estado de repouso.
+   Qualquer transform — inclusive a matriz identidade que o Chrome calcula a
+   partir de `transform: none` dentro de um keyframe — vira containing block e
+   quebra o posicionamento desses elementos.
+   Por isso as animações de entrada usam `fill-mode: backwards` (o transform
+   vale só durante a animação) e o estado final fica no CSS. */
+
 .pda-header {
   flex: 0 0 auto;
   position: relative;
@@ -52,15 +60,16 @@
   background: var(--navy);
   padding: 0.7rem 1.6rem;
   opacity: 0;
-  transform: translateY(-8px);
 }
 
 .pda-shell--mounted .pda-header {
-  animation: pda-fade-down 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 1;
+  animation: pda-fade-down 0.55s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 @keyframes pda-fade-down {
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: none; }
 }
 
 .pda-brand {
@@ -193,15 +202,16 @@
   overflow-y: auto;
   background: var(--navy);
   opacity: 0;
-  transform: translateX(-8px);
 }
 
 .pda-shell--mounted .pda-sidebar {
-  animation: pda-fade-right 0.55s 0.08s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 1;
+  animation: pda-fade-right 0.55s 0.08s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 @keyframes pda-fade-right {
-  to { opacity: 1; transform: translateX(0); }
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: none; }
 }
 
 .pda-nav {
@@ -264,7 +274,6 @@
   overflow-y: auto;
   padding: 1.8rem 2.2rem 2.5rem;
   opacity: 0;
-  transform: translateY(8px);
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -274,20 +283,22 @@
 }
 
 .pda-shell--mounted .pda-main {
-  animation: pda-fade-up 0.55s 0.14s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 1;
+  animation: pda-fade-up 0.55s 0.14s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 @keyframes pda-fade-up {
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
 }
 
 .pda-page-enter {
-  animation: pda-page-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: pda-page-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 @keyframes pda-page-in {
   from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; transform: none; }
 }
 
 @media (max-width: 880px) {
@@ -323,7 +334,7 @@
   }
 
   .pda-shell--mounted .pda-sidebar {
-    animation: pda-fade-up 0.55s 0.08s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: pda-fade-right 0.55s 0.08s cubic-bezier(0.16, 1, 0.3, 1) backwards;
   }
 
   .pda-nav {
